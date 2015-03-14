@@ -18,10 +18,12 @@ export class PatternSearchContent {
   app: PatternSearch;
   _pattern: Pattern;
   _workingCopy: Pattern;
+  labelProvider: Function;
 
   constructor(@Parent() app: PatternSearch) {
     this.app = app;
     this._workingCopy = EMPTY_PATTERN;
+    this.labelProvider = (attr) => attr;
   }
 
   set pattern(p: Pattern) {
@@ -31,9 +33,9 @@ export class PatternSearchContent {
     }
   }
 
-  get pattern(): Pattern {return this._workingCopy;}
+  get pattern(): Pattern { return this._workingCopy; }
 
-  get hasAttributes() {return this._workingCopy.attributes.length > 0;}
+  get hasAttributes() { return this._workingCopy.attributes.length > 0; }
 }
 
 const EMPTY_PATTERN = new Pattern({id: '0', name:'', url:'', attributes:[]});

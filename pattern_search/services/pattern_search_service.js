@@ -67,7 +67,7 @@ export class PatternSearchService {
 var patterns =
   {items: [
       {id:'1',name:'blah_1',url:'blah_url_1',attributes:['tag1','tag2']},
-      {id:'2',name:'blah_2',url:'blah_url_2',attributes:['tag1','tag2']},
-      {id:'3',name:'jbisa',url:'jbisa_url',attributes:[]}
+      {id:'2',name:'blah_2',url:'blah_url_2',attributes:['tag3','tag4']},
+      {id:'3',name:'jbisa',url:'jbisa_url',attributes:['tag5']}
     ]
   }

@@ -5,7 +5,8 @@ import {Chip} from 'pattern_search/components/common/chip/chip';
 @Component({
   selector: 'list-builder',
   bind: {
-    'item-list': 'itemList'
+    'item-list': 'itemList',
+    'label-provider': 'labelProvider'
   }
 })
 @Template({
@@ -14,6 +15,11 @@ import {Chip} from 'pattern_search/components/common/chip/chip';
 })
 export class ListBuilder {
   _itemList: List;
+  labelProvider: Function;
+
+  constructor() {
+    this.labelProvider = (item) => item;
+  }
 
   set itemList(list: List) {this._itemList = list;}
   get itemList(): List {return this._itemList;}

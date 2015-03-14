@@ -4,7 +4,8 @@ import {Component, Template} from 'angular2/angular2';
   selector: 'chip',
   bind: {
     'item': 'item',
-    'delete-handler': 'deleteHandler'
+    'delete-handler': 'deleteHandler',
+    'label-provider': 'labelProvider'
   }
 })
 @Template({
@@ -12,13 +13,20 @@ import {Component, Template} from 'angular2/angular2';
 })
 export class Chip {
   _deleteHandler: Function;
+  labelProvider: Function;
   _item;
 
-  set deleteHandler(handler: Function) {this._deleteHandler = handler;}
-  get deleteHandler(): Function {this._deleteHandler;}
+  constructor() {
+    this.labelProvider = (item) => item;
+  }
 
-  set item(t) {this._item = t;}
-  get item() {return this._item;}
+  set deleteHandler(handler: Function) { this._deleteHandler = handler; }
+  get deleteHandler(): Function { this._deleteHandler; }
+
+  set item(t) { this._item = t; }
+  get item() { return this._item; }
+
+  get itemLabel() { return this.labelProvider(this._item); }
 
   deleteItem() {
     if (this._deleteHandler != null) {this._deleteHandler(this._item);}

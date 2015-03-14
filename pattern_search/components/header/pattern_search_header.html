@@ -19,7 +19,10 @@
 
 <div class="ps-header">
   <h2 class="ps-title">Pattern Search</h2>
-  <input class="ps-search" #query type="text"
+  <input #query
+         autofocus
+         class="ps-search"
+         type="text"
          placeholder="What are you looking for?"
          (keyup)="keyUp(query.value, $event)">
 </div>
