@@ -1,6 +1,6 @@
 import {Component, Template, Foreach} from 'angular2/angular2';
 import {List, ListWrapper} from 'angular2/src/facade/collection';
-import {Chip} from 'pattern_search/components/common/chip/chip';
+import {Chip} from 'pattern_search/components/common/list_builder/chip';
 
 @Component({
   selector: 'list-builder',
@@ -23,4 +23,7 @@ export class ListBuilder {
 
   set itemList(list: List) {this._itemList = list;}
   get itemList(): List {return this._itemList;}
+
+  addItem(item) { ListWrapper.push(this._itemList, item); }
+  deleteItem(item) { ListWrapper.remove(this._itemList, item); }
 }

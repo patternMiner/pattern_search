@@ -3,11 +3,23 @@
   <head>
     <title>Pattern Search: An Angular2 Demo.</title>
     <style type="text/css">
-      body {
+      body,button,input,select,textarea {
         font-family: 'RobotoDraft', Arial, sans-serif;
+        font-size: 13px;
         color: #666666;
+        background-color: #ffffff;
       }
-      </style>
+      body /deep/ button,
+      body /deep/ input,
+      body /deep/ select,
+      body /deep/ textarea {
+        font-family: 'RobotoDraft', Arial, sans-serif;
+        font-size: 13px;
+      }
+      input[type="text"]:focus {
+        outline: none;
+      }
+    </style>
   </head>
 
   <body>

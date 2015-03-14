@@ -3,6 +3,7 @@ import {Parent} from 'angular2/src/core/annotations/visibility';
 import {PatternSearch} from 'pattern_search/components/pattern_search';
 import {Pattern, PatternSearchService} from 'pattern_search/services/pattern_search_service';
 import {ListBuilder} from 'pattern_search/components/common/list_builder/list_builder';
+import {TypeAheadInstiller} from 'pattern_search/components/common/list_builder/type_ahead_instiller';
 
 @Component({
   selector: 'pattern-search-content',
@@ -12,7 +13,7 @@ import {ListBuilder} from 'pattern_search/components/common/list_builder/list_bu
 })
 @Template({
   url: `pattern_search/components/content/pattern_search_content.html`,
-  directives: [PatternSearch, ListBuilder, If]
+  directives: [PatternSearch, ListBuilder, If, TypeAheadInstiller]
 })
 export class PatternSearchContent {
   app: PatternSearch;

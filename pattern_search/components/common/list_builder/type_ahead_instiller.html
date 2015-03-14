@@ -1,0 +1,16 @@
+<style type="text/css">
+  .instiller-input {
+    border: none;
+    width: 100%;
+    appearance: none;
+    box-shadow: none;
+    border-radius: none;
+  }
+</style>
+
+<input #label
+       autofocus
+       class="instiller-input"
+       type="text"
+       placeholder="+Add "
+       (keyup)="keyUp(label, $event)">
