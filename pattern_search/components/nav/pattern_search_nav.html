@@ -1,0 +1,13 @@
+<style type="text/css">
+  .ps-nav {
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    width: 200px;
+  }
+</style>
+<div class="ps-nav">
+  <div *foreach="#pattern in app.patternSearchService.currentPatternList">
+    <a href="#" (click)="viewPatternDetail(pattern)">{{ pattern.name }}</a>
+  </div>
+</div>

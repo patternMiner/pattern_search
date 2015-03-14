@@ -1,0 +1,25 @@
+<style type="text/css">
+  .ps-header {
+    display: flex;
+    flex-flow: row nowrap;
+    flex: 1 100%;
+  }
+  .ps-title {
+    flex: none;
+    width: 200px;
+  }
+  .ps-search {
+    flex: none;
+    padding: 5px;
+    width: 200px;
+    height: 15px;
+    margin: auto 20px;
+  }
+</style>
+
+<div class="ps-header">
+  <h2 class="ps-title">Pattern Search</h2>
+  <input class="ps-search" #query type="text"
+         placeholder="What are you looking for?"
+         (keyup)="keyUp(query.value, $event)">
+</div>

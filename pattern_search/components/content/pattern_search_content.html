@@ -1,0 +1,31 @@
+<style type="text/css">
+  .ps-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 auto;
+  }
+  .ps-content-header {
+    display: flex;
+    flex-direction: column;
+    flex: 1 auto;
+  }
+  .ps-content-detail {
+    display: flex;
+    flex-direction: column;
+    flex: 1 auto;
+  }
+</style>
+
+<div class="ps-content">
+  <div class="ps-content-header">
+    <div>
+      <!-- attributes -->
+      <list-builder *if="hasAttributes"
+                    [item-list]="pattern.attributes"></list-builder>
+    </div>
+    <div><!-- toolbar --></div>
+  </div>
+  <div class="ps-content-detail">
+    {{ pattern.name }}
+  </div>
+</div>

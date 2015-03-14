@@ -1,0 +1,14 @@
+<style type="text/css">
+  .list-container {
+    display: flex;
+    flex-flow: row wrap;
+    flex: 1;
+    border: 1px solid #dddddd;
+    padding: 2px;
+  }
+</style>
+
+<div class="list-container">
+  <chip *foreach="#item in itemList" [item]="item">{{item}}</chip>
+  <content></content>
+</div>

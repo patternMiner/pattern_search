@@ -1,0 +1,20 @@
+<style type="text/css">
+  .ps-shell {
+    display: flex;
+    flex-flow: column;
+    margin: 20px;
+  }
+  .ps-body {
+    display: flex;
+    flex-flow: row nowrap;
+    flex: 1 100%;
+  }
+</style>
+
+<div class="ps-shell">
+  <pattern-search-header></pattern-search-header>
+  <div class="ps-body">
+    <pattern-search-nav></pattern-search-nav>
+    <pattern-search-content [pattern]="currentPattern"></pattern-search-content>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+<style type="text/css">
+  .chip-bordered-box {
+    display: flex;
+    flex-flow: row nowrap;
+    flex: 1;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    background: #F8F8F8;
+    padding: 4px;
+  }
+
+  .chip-close-button {
+    color: #666666;
+    cursor: pointer;
+    margin: auto 3px auto 16px;
+  }
+
+  .chip-label-container {
+    display: flex;
+    flex-flow: row nowrap;
+    flex: 1;
+    color: #666666;
+    margin: 0px 2px;
+  }
+</style>
+
+<div class="chip-bordered-box">
+  <div class="chip-label-container"><content></content></div>
+  <div class="chip-close-button" (click)="deleteItem()">x</div>
+</div>
