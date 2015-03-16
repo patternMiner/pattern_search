@@ -3,11 +3,12 @@
     display: flex;
     flex-direction: column;
     flex: none;
-    width: 200px;
+    width: 220px;
+    margin: 10px 10px 0 0;
   }
 </style>
 <div class="ps-nav">
-  <div *foreach="#pattern in app.patternSearchService.currentPatternList">
-    <a href="#" (click)="viewPatternDetail(pattern)">{{ pattern.name }}</a>
-  </div>
+  <ps-menu [list-provider]="listProvider"
+        [selection-model]="selectionModel">
+  </ps-menu>
 </div>

@@ -1,0 +1,40 @@
+<style type="text/css">
+  .menu-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 auto;
+  }
+  .menu-item-row {
+    display: flex;
+    flex-flow: row nowrap;
+    flex: 1 auto;
+    padding: 5px 0 5px 0;
+  }
+  .menu-item-row:hover {
+    background: #f1f1f1;
+    color: #3B7BEA;
+  }
+  .menu-item {
+    padding-left: 4px;
+    overflow: hidden;
+  }
+  .menu-item-state-regular {
+    border-left: transparent solid 4px;
+    min-width: 4px;
+  }
+  .menu-item-state-selected {
+    border-left: #db4437 solid 4px;
+    min-width: 4px;
+  }
+</style>
+<div class="menu-container">
+  <div class="menu-item-row" *foreach="#item in listProvider.items">
+    <div class="menu-item-state-regular"
+         *if="!selectionModel.isSelected(item)"></div>
+    <div class="menu-item-state-selected"
+         *if="selectionModel.isSelected(item)"></div>
+    <div class="menu-item" (click)="selectionModel.select([item])">
+      {{ listProvider.label(item) }}
+    </div>
+  </div>
+</div>

@@ -2,12 +2,11 @@
   .ps-shell {
     display: flex;
     flex-flow: column;
-    margin: 20px;
   }
   .ps-body {
     display: flex;
     flex-flow: row nowrap;
-    flex: 1 100%;
+    flex: none;
   }
 </style>
 
@@ -15,6 +14,6 @@
   <pattern-search-header></pattern-search-header>
   <div class="ps-body">
     <pattern-search-nav></pattern-search-nav>
-    <pattern-search-content [pattern]="currentPattern"></pattern-search-content>
+    <pattern-search-content [pattern]="pattern"></pattern-search-content>
   </div>
 </div>

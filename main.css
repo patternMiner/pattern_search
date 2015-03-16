@@ -1,0 +1,199 @@
+body,button,input,select,textarea {
+  font-family: 'RobotoDraft', Arial, sans-serif;
+  font-size: 13px;
+  background-color: #f8f8f8f8;
+}
+body /deep/ button,
+body /deep/ input,
+body /deep/ select,
+body /deep/ textarea {
+  font-family: 'RobotoDraft', Arial, sans-serif;
+  font-size: 13px;
+}
+input[type="text"]:focus {
+  outline: none;
+}
+
+body /deep/ a {
+  cursor: pointer;
+  text-decoration: none;
+}
+
+body /deep/ a:hover {
+  color: #3B7BEA;
+}
+
+button {
+  display: inline-block;
+  white-space: nowrap;
+  min-width: 62px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  height: 29px;
+  padding: 0 8px;
+  margin: 0;
+  line-height: 27px;
+  border-radius: 2px;
+  cursor: default;
+
+  color: #444;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: #f5f5f5;
+  background-image: linear-gradient(#f5f5f5, #f1f1f1);
+  transition: all 0.218s;
+}
+
+button:hover {
+  border: 1px solid #C6C6C6;
+  color: #222;
+  box-shadow: 0px 1px 1px rgba(0,0,0,0.1);
+  transition: all 0s;
+  background-color: #f8f8f8;
+  background-image: linear-gradient(#f8f8f8, #f1f1f1);
+ }
+
+button:active {
+  border: 1px solid #C6C6C6;
+  color: #666;
+  box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1);
+  background-color: #f6f6f6;
+  background-image: linear-gradient(#f6f6f6, #f1f1f1);
+}
+
+button:focus {
+  outline: none;
+  border: 1px solid #4D90FE;
+  z-index: 4 !important;
+}
+
+button.disabled,
+button.disabled:hover,
+button.disabled:active,
+button[disabled],
+button[disabled]:hover,
+button[disabled]:active {
+  background: none;
+  color: #b8b8b8;
+  border: 1px solid rgba(0,0,0,0.05);
+  cursor: default;
+  pointer-events: none;
+}
+
+button.flat {
+   background: none;
+   border-color: transparent;
+   padding: 0;
+   box-shadow: none;
+ }
+
+button.selected {
+  border: 1px solid #CCC;
+  color: #666;
+  box-shadow: inset 0px 1px 2px rgba(0,0,0,0.1);
+  background-color: #EEEEEE;
+  background-image: linear-gradient(#EEEEEE, #E0E0E0);
+}
+
+button.invalid {
+   outline: none;
+   border: 1px solid #db4437;
+   box-shadow: inset 0px 1px 2px rgba(0,0,0,0.3);
+}
+
+button.left {
+  border-radius: 2 0 0 2;
+  min-width: 30px;
+}
+
+button.right {
+  border-radius: 0 2 2 0;
+  min-width: 30px;
+}
+
+button.left.right {
+  border-radius: 2;
+}
+
+button.middle {
+  border-radius: 0;
+  border-left-width: 0;
+  min-width: 30px;
+}
+
+button.small,
+button.toolbar-btn {
+  min-width: 30px;
+}
+
+button.primary {
+  color: #FFF !important;
+  min-width: 94px;
+  border-color: #3079ed;
+  background-color: #4d90fe;
+  background-image: linear-gradient(#4d90fe, #4787ed);
+}
+
+button.primary:hover, 
+button.primary:active {
+  border-color: #2f5bb7;
+  background-color: #4d90fe;
+  background-image: linear-gradient(#4d90fe, #357ae8);
+}
+
+button.primary:focus {
+   border-color: #4D90FE;
+   box-shadow:inset 0 0 0 1px rgba(255,255,255,0.5);
+}
+
+button.primary:focus:hover {
+   box-shadow:inset 0 0 0 1px #fff, 0px 1px 1px rgba(0,0,0,0.1);
+}
+
+button.primary.disabled,
+button.primary.disabled:hover,
+button.primary.disabled:active,
+button.primary[disabled],
+button.primary[disabled]:hover,
+button.primary[disabled]:active {
+   border-color:#3079ed;
+   background-color: #4d90fe;
+   opacity: 0.7;
+}
+
+/* Red new/create Button and it's states */
+button.action {
+  color: #FFF !important;
+  min-width: 94px;
+  border-color: #b0281a;
+  background-color: #dd4b39;
+  background-image: linear-gradient(#dd4b39, #d14836);
+}
+
+button.primary:hover,
+button.primary:active {
+  border-color: #b0281a;
+  border-bottom-color: #af301f;
+  background-color: #dd4b39;
+  background-image: linear-gradient(#dd4b39, #c53727);
+}
+
+button.primary:focus {
+  border-color: #dd4b39;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.5);
+}
+
+button.primary:focus:hover {
+  box-shadow:inset 0 0 0 1px #fff, 0px 1px 1px rgba(0,0,0,0.1);
+}
+
+button.primary.disabled,
+button.primary.disabled:hover,
+button.primary.disabled:active,
+button.primary[disabled],
+button.primary[disabled]:hover,
+button.primary[disabled]:active {
+   border-color: #b0281a;
+   background-color: #d14836;
+   opacity: 0.7;  
+}

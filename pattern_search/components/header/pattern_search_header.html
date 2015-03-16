@@ -3,10 +3,13 @@
     display: flex;
     flex-flow: row nowrap;
     flex: 1 100%;
+    background: #f2f2f2;
   }
   .ps-title {
     flex: none;
     width: 200px;
+    margin-left: 20px;
+    color: #db4437;
   }
   .ps-search {
     flex: none;
@@ -18,7 +21,7 @@
 </style>
 
 <div class="ps-header">
-  <h2 class="ps-title">Pattern Search</h2>
+  <h1 class="ps-title">Pattern Search</h1>
   <input #query
          autofocus
          class="ps-search"

@@ -8,31 +8,64 @@
     display: flex;
     flex-direction: column;
     flex: 1 auto;
+    margin-top: 10px;
   }
   .ps-content-detail {
     display: flex;
-    flex-direction: column;
+    flex-flow: row nowrap;
     flex: 1 auto;
     margin-top: 10px;
+  }
+  .ps-toolbar {
+    margin: 10px 0;
+    display: flex;
+    flex-flow: row nowrap;
+  }
+  .ps-btn {
+    margin-right: 10px;
   }
   .instiller {
     margin: auto 0;
   }
+  .edit-attributes-header {
+    font-size: 1.17em;
+    color: #777777;
+  }
+  .related-links-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 auto;
+    margin-left: 10px;
+  }
+  .related-links-header {
+    font-size: 1.17em;
+    color: #777777;
+  }
 </style>
 
-<div class="ps-content">
+<div class="ps-content" *if="pattern.id != 0">
   <div class="ps-content-header">
-    <div>
-      <!-- attributes -->
-      <list-builder *if="hasAttributes"
-                    [item-list]="pattern.attributes"
-                    [label-provider]="labelProvider">
-        <type-ahead-instiller class="instiller"></type-ahead-instiller>
-      </list-builder>
+    <div class="edit-attributes-header">Attributes:</div>
+    <list-builder [item-list]="pattern.attributes"
+                  [label-provider]="labelProvider">
+      <type-ahead-instiller class="instiller"></type-ahead-instiller>
+    </list-builder>
+    <div class="ps-toolbar">
+      <button class="ps-btn primary" [disabled]="!isDirty" (click)="save()">
+        Save
+      </button>
+      <button class="ps-btn" [disabled]="!isDirty" (click)="cancel()">
+        Cancel
+      </button>
     </div>
-    <div><!-- toolbar --></div>
   </div>
   <div class="ps-content-detail">
-    {{ pattern.name }}
+    <img src="{{pattern.url}}">
+    <div class="related-links-container">
+      <div class="related-links-header">Related links:</div>
+      <ps-menu [list-provider]="listProvider"
+               [selection-model]="selectionModel">
+      </ps-menu>
+    </div>
   </div>
 </div>

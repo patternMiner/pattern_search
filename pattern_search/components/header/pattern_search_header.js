@@ -19,7 +19,7 @@ export class PatternSearchHeader {
 
   keyUp(query, event) {
     if (event.keyCode == 13) {
-      this.app.patternSearchService.performSearch(query.value);
+      this.app.search(query.value);
       query.value = '';
     }
   }
