@@ -79,21 +79,26 @@ var patterns =
         name:'PatternSearch_outline',
         url:'images/PatternSearch_outline.png',
         attributes:['ES6 Modules', 'System.js module loader', 'Traceur', 'Shadow DOM', 'Performance'],
-        relatedPatterns:['2', '3']},
+        relatedPatterns:['4', '3', '2']},
       {
         id:'2',
         name:'PatternSearch',
         url:'images/PatternSearch.png',
-        attributes:['Web-Components', 'Dependency Injection', 'Service',
-          'Component', 'Template', 'AtScript', 'ES6 Classes', 'ES6 Fat Arrow',
-          'Unambiguous Syntax'],
-        relatedPatterns:['1', '3']},
+        attributes:['Angular2', 'Shadow Dom', 'Web-Components',
+          'Dependency Injection', 'Service', 'Component', 'Template',
+          'AtScript', 'ES6 Classes', 'ES6 Fat Arrow', 'Unambiguous Syntax'],
+        relatedPatterns:['4', '3', '1']},
       {
         id:'3',
         name:'ListBuilder',
         url:'images/ListBuilder.png',
-        attributes:['Angular2', 'Component in detail', 'Shadow Dom',
-          'data binding', ],
-        relatedPatterns:['1', '2']},
-      ]
+        attributes:['Replaceable ItemListInstiller'],
+        relatedPatterns:['4', '2', '1']},
+    {
+      id:'4',
+      name:'Menu',
+      url:'images/Menu.png',
+      attributes:['ListProvider', 'Sharable SelectionModel'],
+      relatedPatterns:['3', '2', '1']},
+    ]
   }
