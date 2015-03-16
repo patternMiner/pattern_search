@@ -27,6 +27,7 @@ export class PatternSearch {
     this.selectionModel = new SelectionModel([], (selections) => {
       this._pattern = ListWrapper.first(selections);
     }, false);
+    this.selectionModel.select([ListWrapper.first(this.patternList)]);
   }
 
   set pattern(p: Pattern) {
@@ -43,6 +44,7 @@ export class PatternSearch {
     this.patternSearchService.search(query).forEach((p) => {
       this.patternList.push(p);
     });
+    this.selectionModel.select([ListWrapper.first(this.patternList)]);
   }
 
   save(pattern: Pattern) {

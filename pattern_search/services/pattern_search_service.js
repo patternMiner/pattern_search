@@ -44,12 +44,12 @@ export class PatternSearchService {
   }
 
   search(query: string): List<Pattern> {
-    this._query = query;
+    this._query = query.toLowerCase();
     var patternList = [];
     this._patternMap.forEach((p) => {
-      if (StringWrapper.contains(p.name, query) ||
+      if (StringWrapper.contains(p.name.toLowerCase(), query) ||
           ListWrapper.any(p.attributes,
-              (a) => StringWrapper.contains(a, query))) {
+              (a) => StringWrapper.contains(a.toLowerCase(), query))) {
         patternList.push(p);
       }
     });
@@ -78,19 +78,22 @@ var patterns =
         id:'1',
         name:'PatternSearch_outline',
         url:'images/PatternSearch_outline.png',
-        attributes:[],
+        attributes:['ES6 Modules', 'System.js module loader', 'Traceur', 'Shadow DOM', 'Performance'],
         relatedPatterns:['2', '3']},
       {
         id:'2',
         name:'PatternSearch',
         url:'images/PatternSearch.png',
-        attributes:[],
+        attributes:['Web-Components', 'Dependency Injection', 'Service',
+          'Component', 'Template', 'AtScript', 'ES6 Classes', 'ES6 Fat Arrow',
+          'Unambiguous Syntax'],
         relatedPatterns:['1', '3']},
       {
         id:'3',
         name:'ListBuilder',
         url:'images/ListBuilder.png',
-        attributes:[],
+        attributes:['Angular2', 'Component in detail', 'Shadow Dom',
+          'data binding', ],
         relatedPatterns:['1', '2']},
       ]
   }
