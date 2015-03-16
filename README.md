@@ -11,4 +11,24 @@ Angular2 framework, such as:
 The end result of the above features is a simple cognitive process of web
 standards based component development.
 
+# Install
+
+Clone this project somewhere on your disk, and cd to the project root.
+
+If you don't have `npm` yet:
+
+     curl https://npmjs.org/install.sh | sh
+
+Once you have `npm`:
+
+     npm install http-server -g
+
+This will install `http-server` globally so that it may be run from the command line.
+
+## Run the webserver:
+
+     http-server -c-1 .
+
+Open the following URL in Chrome:
+http://localhost:8080/index.html
 
