@@ -99,6 +99,6 @@ var patterns =
       name:'Menu',
       url:'images/Menu.png',
       attributes:['ListProvider', 'Sharable SelectionModel'],
-      relatedPatterns:['3', '2', '1']},
+      relatedPatterns:['3', '2', '1']}
     ]
   }

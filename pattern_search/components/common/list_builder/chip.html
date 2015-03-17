@@ -24,6 +24,6 @@
 </style>
 
 <div class="chip-bordered-box">
-  <div class="chip-label-container">{{ itemLabel }}</div>
+  <div class="chip-label-container" [text-content]="itemLabel"></div>
   <div class="chip-close-button" (click)="deleteItem()">x</div>
 </div>

@@ -13,16 +13,13 @@ import {ListBuilder} from 'pattern_search/components/common/list_builder/list_bu
 })
 export class Chip {
   builder: ListBuilder;
-  _item;
+  item;
 
   constructor(@Parent() builder: ListBuilder) {
       this.builder = builder;
   }
 
-  set item(t) { this._item = t; }
-  get item() { return this._item; }
+  get itemLabel() { return this.builder.labelProvider(this.item); }
 
-  get itemLabel() { return this.builder.labelProvider(this._item); }
-
-  deleteItem() { this.builder.deleteItem(this._item); }
+  deleteItem() { this.builder.deleteItem(this.item); }
 }
