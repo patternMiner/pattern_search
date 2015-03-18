@@ -6,7 +6,9 @@ import {Chip} from 'pattern_search/components/common/list_builder/chip';
   selector: 'list-builder',
   bind: {
     'item-list': 'itemList',
-    'label-provider': 'labelProvider'
+    'label-provider': 'labelProvider',
+    'item-added-listener': 'itemAddedListener',
+    'item-deleted-listener': 'itemDeletedListener'
   }
 })
 @Template({
@@ -16,6 +18,8 @@ import {Chip} from 'pattern_search/components/common/list_builder/chip';
 export class ListBuilder {
   _itemList: List;
   labelProvider: Function;
+  itemAddedListener: Function;
+  itemDeletedListener: Function;
 
   constructor() {
     this.labelProvider = (item) => item;
@@ -24,6 +28,17 @@ export class ListBuilder {
   set itemList(list: List) {this._itemList = list;}
   get itemList(): List {return this._itemList;}
 
-  addItem(item) { ListWrapper.push(this._itemList, item); }
-  deleteItem(item) { ListWrapper.remove(this._itemList, item); }
+  addItem(item) {
+    ListWrapper.push(this._itemList, item);
+    if (itemAddedListener != null) {
+      itemAddedListener(item);
+    }
+  }
+
+  deleteItem(item) {
+    ListWrapper.remove(this._itemList, item);
+    if (itemDeletedListener != null) {
+      itemDeletedListener(item);
+    }
+  }
 }
