@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/dom/dom_adapter", "angular2/src/facade/lang", "angular2/src/facade/collection", "./pipeline/compile_step", "./pipeline/compile_element", "./pipeline/compile_control", "./shadow_dom_strategy", "./directive_metadata"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/dom/dom_adapter", "angular2/src/facade/lang", "angular2/src/facade/collection", "./pipeline/compile_step", "./pipeline/compile_element", "./pipeline/compile_control", "./shadow_dom_strategy", "./directive_metadata"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       DOM,
       isPresent,
       List,
@@ -15,6 +16,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/dom/dom_adapter", "ang
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       DOM = $__m.DOM;
     }, function($__m) {
@@ -44,6 +47,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/dom/dom_adapter", "ang
             return new _CssProcessorStep(strategyStep, this._transformers);
           }}, {});
       }()));
+      Object.defineProperty(CssProcessor, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(CssProcessor, "parameters", {get: function() {
           return [[assert.genericType(List, CssTransformer)]];
         }});

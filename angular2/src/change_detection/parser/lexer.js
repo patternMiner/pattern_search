@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "angular2/src/facade/lang"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/collection", "angular2/src/facade/lang"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       List,
       ListWrapper,
       SetWrapper,
@@ -182,6 +183,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
     setters: [function($__m) {
       assert = $__m.assert;
     }, function($__m) {
+      Injectable = $__m.Injectable;
+    }, function($__m) {
       List = $__m.List;
       ListWrapper = $__m.ListWrapper;
       SetWrapper = $__m.SetWrapper;
@@ -212,6 +215,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
             return assert.returnType((tokens), List);
           }}, {});
       }()));
+      Object.defineProperty(Lexer, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(Lexer.prototype.tokenize, "parameters", {get: function() {
           return [[assert.type.string]];
         }});

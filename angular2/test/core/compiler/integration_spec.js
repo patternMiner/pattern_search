@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/dom/dom_adapter", "angular2/src/facade/lang", "angular2/src/facade/async", "angular2/di", "angular2/change_detection", "angular2/src/core/compiler/compiler", "angular2/src/core/compiler/directive_metadata_reader", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/core/compiler/template_loader", "angular2/src/mock/template_resolver_mock", "angular2/src/core/compiler/binding_propagation_config", "angular2/src/core/compiler/component_url_mapper", "angular2/src/core/compiler/url_resolver", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/css_processor", "angular2/src/core/annotations/annotations", "angular2/src/core/annotations/template", "angular2/src/core/annotations/visibility", "angular2/src/core/annotations/di", "angular2/src/directives/if", "angular2/src/core/compiler/view_container"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/dom/dom_adapter", "angular2/src/facade/lang", "angular2/src/facade/async", "angular2/di", "angular2/change_detection", "angular2/src/core/compiler/compiler", "angular2/src/core/compiler/directive_metadata_reader", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/core/compiler/private_component_location", "angular2/src/core/compiler/private_component_loader", "angular2/src/core/compiler/template_loader", "angular2/src/mock/template_resolver_mock", "angular2/src/core/compiler/binding_propagation_config", "angular2/src/core/compiler/component_url_mapper", "angular2/src/core/compiler/url_resolver", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/css_processor", "angular2/src/core/events/event_manager", "angular2/src/core/annotations/annotations", "angular2/src/core/annotations/template", "angular2/src/core/annotations/visibility", "angular2/src/core/annotations/di", "angular2/src/directives/if", "angular2/src/core/compiler/view_container"], function($__export) {
   "use strict";
   var assert,
       AsyncTestCompleter,
@@ -19,6 +19,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       isJsObject,
       PromiseWrapper,
       Injector,
+      bind,
       Lexer,
       Parser,
       dynamicChangeDetection,
@@ -28,7 +29,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       Compiler,
       CompilerCache,
       DirectiveMetadataReader,
-      NativeShadowDomStrategy,
+      ShadowDomStrategy,
+      EmulatedUnscopedShadowDomStrategy,
+      PrivateComponentLocation,
+      PrivateComponentLoader,
       TemplateLoader,
       MockTemplateResolver,
       BindingPropagationConfig,
@@ -36,15 +40,19 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       UrlResolver,
       StyleUrlResolver,
       CssProcessor,
+      EventManager,
       Decorator,
       Component,
       Viewport,
+      DynamicComponent,
       Template,
       Parent,
       Ancestor,
       EventEmitter,
       If,
       ViewContainer,
+      DynamicComp,
+      HelloCmp,
       MyDir,
       PushBasedComp,
       MyComp,
@@ -63,14 +71,19 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       IdComponent;
   function main() {
     describe('integration tests', function() {
-      var compiler,
+      var directiveMetadataReader,
+          shadowDomStrategy,
+          compiler,
           tplResolver;
       function createCompiler(tplResolver, changedDetection) {
         var urlResolver = new UrlResolver();
-        return new Compiler(changedDetection, new TemplateLoader(null, null), new DirectiveMetadataReader(), new Parser(new Lexer()), new CompilerCache(), new NativeShadowDomStrategy(new StyleUrlResolver(urlResolver)), tplResolver, new ComponentUrlMapper(), urlResolver, new CssProcessor(null));
+        return new Compiler(changedDetection, new TemplateLoader(null, null), directiveMetadataReader, new Parser(new Lexer()), new CompilerCache(), shadowDomStrategy, tplResolver, new ComponentUrlMapper(), urlResolver, new CssProcessor(null));
       }
       beforeEach((function() {
         tplResolver = new MockTemplateResolver();
+        directiveMetadataReader = new DirectiveMetadataReader();
+        var urlResolver = new UrlResolver();
+        shadowDomStrategy = new EmulatedUnscopedShadowDomStrategy(new StyleUrlResolver(urlResolver), null);
         compiler = createCompiler(tplResolver, dynamicChangeDetection);
       }));
       describe('react to record changes', function() {
@@ -80,7 +93,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
         function createView(pv) {
           ctx = new MyComp();
           view = pv.instantiate(null, null);
-          view.hydrate(new Injector([]), null, ctx);
+          view.hydrate(new Injector([bind(Compiler).toValue(compiler), bind(DirectiveMetadataReader).toValue(directiveMetadataReader), bind(ShadowDomStrategy).toValue(shadowDomStrategy), bind(EventManager).toValue(null), PrivateComponentLoader]), null, null, ctx, null);
           cd = view.changeDetector;
         }
         it('should consume text node changes', inject([AsyncTestCompleter], (function(async) {
@@ -182,7 +195,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
             createView(pv);
             ctx.ctxProp = 'a';
             cd.detectChanges();
-            var comp = view.contextWithLocals.get("comp");
+            var comp = view.locals.get("comp");
             expect(comp.prop).toEqual('aaaa');
             async.done();
           }));
@@ -195,7 +208,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
             cd.detectChanges();
-            expect(view.nodes[0].shadowRoot.childNodes[0].nodeValue).toEqual('hello');
+            expect(view.nodes).toHaveText('hello');
             async.done();
           }));
         })));
@@ -234,11 +247,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
             ctx.ctxProp = 'some_id';
             cd.detectChanges();
             expect(view.nodes[0].id).toEqual('some_id');
-            expect(DOM.getInnerHTML(view.nodes[0].shadowRoot.childNodes[0])).toEqual('Matched on id with some_id');
+            expect(view.nodes).toHaveText('Matched on id with some_id');
             ctx.ctxProp = 'other_id';
             cd.detectChanges();
             expect(view.nodes[0].id).toEqual('other_id');
-            expect(DOM.getInnerHTML(view.nodes[0].shadowRoot.childNodes[0])).toEqual('Matched on id with other_id');
+            expect(view.nodes).toHaveText('Matched on id with other_id');
             async.done();
           }));
         })));
@@ -279,8 +292,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           }));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            expect(view.contextWithLocals).not.toBe(null);
-            expect(view.contextWithLocals.get('alice')).toBeAnInstanceOf(ChildComp);
+            expect(view.locals).not.toBe(null);
+            expect(view.locals.get('alice')).toBeAnInstanceOf(ChildComp);
             async.done();
           }));
         })));
@@ -291,10 +304,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           }));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            expect(view.contextWithLocals).not.toBe(null);
-            expect(view.contextWithLocals.get('alice')).toBeAnInstanceOf(ChildComp);
-            expect(view.contextWithLocals.get('bob')).toBeAnInstanceOf(ChildComp);
-            expect(view.contextWithLocals.get('alice')).not.toBe(view.contextWithLocals.get('bob'));
+            expect(view.locals).not.toBe(null);
+            expect(view.locals.get('alice')).toBeAnInstanceOf(ChildComp);
+            expect(view.locals.get('bob')).toBeAnInstanceOf(ChildComp);
+            expect(view.locals.get('alice')).not.toBe(view.locals.get('bob'));
             async.done();
           }));
         })));
@@ -305,8 +318,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           }));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            expect(view.contextWithLocals).not.toBe(null);
-            expect(view.contextWithLocals.get('alice')).toBeAnInstanceOf(ChildComp);
+            expect(view.locals).not.toBe(null);
+            expect(view.locals.get('alice')).toBeAnInstanceOf(ChildComp);
             async.done();
           }));
         })));
@@ -314,8 +327,19 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           tplResolver.setTemplate(MyComp, new Template({inline: '<p><div var-alice><i>Hello</i></div></p>'}));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            expect(view.contextWithLocals).not.toBe(null);
-            var value = view.contextWithLocals.get('alice');
+            expect(view.locals).not.toBe(null);
+            var value = view.locals.get('alice');
+            expect(value).not.toBe(null);
+            expect(value.tagName.toLowerCase()).toEqual('div');
+            async.done();
+          }));
+        })));
+        it('should assign the element instance to a user-defined variable with camelCase using dash-case', inject([AsyncTestCompleter], (function(async) {
+          tplResolver.setTemplate(MyComp, new Template({inline: '<p><div var-super-alice><i>Hello</i></div></p>'}));
+          compiler.compile(MyComp).then((function(pv) {
+            createView(pv);
+            expect(view.locals).not.toBe(null);
+            var value = view.locals.get('superAlice');
             expect(value).not.toBe(null);
             expect(value.tagName.toLowerCase()).toEqual('div');
             async.done();
@@ -328,7 +352,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           }));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            var cmp = view.contextWithLocals.get('cmp');
+            var cmp = view.locals.get('cmp');
             cd.detectChanges();
             expect(cmp.numberOfChecks).toEqual(1);
             cd.detectChanges();
@@ -346,7 +370,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           }));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            var childComponent = view.contextWithLocals.get('child');
+            var childComponent = view.locals.get('child');
             expect(childComponent.myParent).toBeAnInstanceOf(SomeDirective);
             async.done();
           }));
@@ -358,7 +382,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           }));
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
-            var childComponent = view.contextWithLocals.get('child');
+            var childComponent = view.locals.get('child');
             expect(childComponent.myAncestor).toBeAnInstanceOf(SomeDirective);
             async.done();
           }));
@@ -371,8 +395,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           compiler.compile(MyComp).then((function(pv) {
             createView(pv);
             cd.detectChanges();
-            var subview = view.viewContainers[0].get(0);
-            var childComponent = subview.contextWithLocals.get('child');
+            var subview = view.viewContainers[1].get(0);
+            var childComponent = subview.locals.get('child');
             expect(childComponent.myAncestor).toBeAnInstanceOf(SomeDirective);
             async.done();
           }));
@@ -393,6 +417,22 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
             expect(emitter.msg).toEqual('fired !');
             expect(listener.msg).toEqual('fired !');
             async.done();
+          }));
+        })));
+        it('should support dynamic components', inject([AsyncTestCompleter], (function(async) {
+          tplResolver.setTemplate(MyComp, new Template({
+            inline: '<dynamic-comp #dynamic></dynamic-comp>',
+            directives: [DynamicComp]
+          }));
+          compiler.compile(MyComp).then((function(pv) {
+            createView(pv);
+            var dynamicComponent = view.locals.get("dynamic");
+            expect(dynamicComponent).toBeAnInstanceOf(DynamicComp);
+            dynamicComponent.done.then((function(_) {
+              cd.detectChanges();
+              expect(view.nodes).toHaveText('hello');
+              async.done();
+            }));
           }));
         })));
       });
@@ -461,6 +501,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       PromiseWrapper = $__m.PromiseWrapper;
     }, function($__m) {
       Injector = $__m.Injector;
+      bind = $__m.bind;
     }, function($__m) {
       Lexer = $__m.Lexer;
       Parser = $__m.Parser;
@@ -474,7 +515,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
     }, function($__m) {
       DirectiveMetadataReader = $__m.DirectiveMetadataReader;
     }, function($__m) {
-      NativeShadowDomStrategy = $__m.NativeShadowDomStrategy;
+      ShadowDomStrategy = $__m.ShadowDomStrategy;
+      EmulatedUnscopedShadowDomStrategy = $__m.EmulatedUnscopedShadowDomStrategy;
+    }, function($__m) {
+      PrivateComponentLocation = $__m.PrivateComponentLocation;
+    }, function($__m) {
+      PrivateComponentLoader = $__m.PrivateComponentLoader;
     }, function($__m) {
       TemplateLoader = $__m.TemplateLoader;
     }, function($__m) {
@@ -490,9 +536,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
     }, function($__m) {
       CssProcessor = $__m.CssProcessor;
     }, function($__m) {
+      EventManager = $__m.EventManager;
+    }, function($__m) {
       Decorator = $__m.Decorator;
       Component = $__m.Component;
       Viewport = $__m.Viewport;
+      DynamicComponent = $__m.DynamicComponent;
     }, function($__m) {
       Template = $__m.Template;
     }, function($__m) {
@@ -506,6 +555,28 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       ViewContainer = $__m.ViewContainer;
     }],
     execute: function() {
+      DynamicComp = (function() {
+        var DynamicComp = function DynamicComp(loader, location) {
+          assert.argumentTypes(loader, PrivateComponentLoader, location, PrivateComponentLocation);
+          this.done = loader.load(HelloCmp, location);
+        };
+        return ($traceurRuntime.createClass)(DynamicComp, {}, {});
+      }());
+      Object.defineProperty(DynamicComp, "annotations", {get: function() {
+          return [new DynamicComponent({selector: 'dynamic-comp'})];
+        }});
+      Object.defineProperty(DynamicComp, "parameters", {get: function() {
+          return [[PrivateComponentLoader], [PrivateComponentLocation]];
+        }});
+      HelloCmp = (function() {
+        var HelloCmp = function HelloCmp() {
+          this.greeting = "hello";
+        };
+        return ($traceurRuntime.createClass)(HelloCmp, {}, {});
+      }());
+      Object.defineProperty(HelloCmp, "annotations", {get: function() {
+          return [new Component({selector: 'hello-cmp'}), new Template({inline: "{{greeting}}"})];
+        }});
       MyDir = (function() {
         var MyDir = function MyDir() {
           this.dirProp = '';

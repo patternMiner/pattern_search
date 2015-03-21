@@ -14,6 +14,7 @@ System.register(["angular2/test_lib", "angular2/src/core/application", "angular2
       appDocumentToken,
       appElementToken,
       Component,
+      Decorator,
       DOM,
       ListWrapper,
       PromiseWrapper,
@@ -25,7 +26,9 @@ System.register(["angular2/test_lib", "angular2/src/core/application", "angular2
       HelloRootCmpContent,
       HelloRootCmp2,
       HelloRootCmp3,
-      HelloRootCmp4;
+      HelloRootCmp4,
+      HelloRootMissingTemplate,
+      HelloRootDirectiveIsNotCmp;
   function main() {
     var fakeDoc,
         el,
@@ -44,6 +47,24 @@ System.register(["angular2/test_lib", "angular2/src/core/application", "angular2
       testBindings = [bind(appDocumentToken).toValue(fakeDoc)];
     }));
     describe('bootstrap factory method', (function() {
+      it('should throw if no Template found', inject([AsyncTestCompleter], (function(async) {
+        var injectorPromise = bootstrap(HelloRootMissingTemplate, testBindings, (function(e, t) {
+          throw e;
+        }));
+        PromiseWrapper.then(injectorPromise, null, (function(reason) {
+          expect(reason.message).toContain('No template found for HelloRootMissingTemplate');
+          async.done();
+        }));
+      })));
+      it('should throw if bootstrapped Directive is not a Component', inject([AsyncTestCompleter], (function(async) {
+        var injectorPromise = bootstrap(HelloRootDirectiveIsNotCmp, testBindings, (function(e, t) {
+          throw e;
+        }));
+        PromiseWrapper.then(injectorPromise, null, (function(reason) {
+          expect(reason.message).toContain('Only Components can be bootstrapped; ' + 'Directive of HelloRootDirectiveIsNotCmp is not a Component');
+          async.done();
+        }));
+      })));
       it('should throw if no element is found', inject([AsyncTestCompleter], (function(async) {
         var injectorPromise = bootstrap(HelloRootCmp, [], (function(e, t) {
           throw e;
@@ -129,6 +150,7 @@ System.register(["angular2/test_lib", "angular2/src/core/application", "angular2
       appElementToken = $__m.appElementToken;
     }, function($__m) {
       Component = $__m.Component;
+      Decorator = $__m.Decorator;
     }, function($__m) {
       DOM = $__m.DOM;
     }, function($__m) {
@@ -192,6 +214,20 @@ System.register(["angular2/test_lib", "angular2/src/core/application", "angular2
         }});
       Object.defineProperty(HelloRootCmp4, "parameters", {get: function() {
           return [[new Inject(LifeCycle)]];
+        }});
+      HelloRootMissingTemplate = (function() {
+        var HelloRootMissingTemplate = function HelloRootMissingTemplate() {};
+        return ($traceurRuntime.createClass)(HelloRootMissingTemplate, {}, {});
+      }());
+      Object.defineProperty(HelloRootMissingTemplate, "annotations", {get: function() {
+          return [new Component({selector: 'hello-app'})];
+        }});
+      HelloRootDirectiveIsNotCmp = (function() {
+        var HelloRootDirectiveIsNotCmp = function HelloRootDirectiveIsNotCmp() {};
+        return ($traceurRuntime.createClass)(HelloRootDirectiveIsNotCmp, {}, {});
+      }());
+      Object.defineProperty(HelloRootDirectiveIsNotCmp, "annotations", {get: function() {
+          return [new Decorator({selector: 'hello-app'})];
         }});
     }
   };

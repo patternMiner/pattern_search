@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/async", "angular2/src/facade/collection", "angular2/change_detection", "./directive_metadata_reader", "./view", "./pipeline/compile_pipeline", "./pipeline/compile_element", "./pipeline/default_steps", "./template_loader", "./template_resolver", "./directive_metadata", "../annotations/template", "./shadow_dom_strategy", "./pipeline/compile_step", "./component_url_mapper", "./url_resolver", "./css_processor"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "angular2/src/facade/async", "angular2/src/facade/collection", "angular2/change_detection", "./directive_metadata_reader", "./view", "./pipeline/compile_pipeline", "./pipeline/compile_element", "./pipeline/default_steps", "./template_loader", "./template_resolver", "../annotations/template", "./shadow_dom_strategy", "./pipeline/compile_step", "./component_url_mapper", "./url_resolver", "./css_processor"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       Type,
       isBlank,
       isPresent,
@@ -22,7 +23,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       createDefaultSteps,
       TemplateLoader,
       TemplateResolver,
-      DirectiveMetadata,
       Template,
       ShadowDomStrategy,
       CompileStep,
@@ -34,6 +34,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       Type = $__m.Type;
       isBlank = $__m.isBlank;
@@ -67,8 +69,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     }, function($__m) {
       TemplateResolver = $__m.TemplateResolver;
     }, function($__m) {
-      DirectiveMetadata = $__m.DirectiveMetadata;
-    }, function($__m) {
       Template = $__m.Template;
     }, function($__m) {
       ShadowDomStrategy = $__m.ShadowDomStrategy;
@@ -101,6 +101,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           }
         }, {});
       }()));
+      Object.defineProperty(CompilerCache, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(CompilerCache.prototype.set, "parameters", {get: function() {
           return [[Type], [ProtoView]];
         }});
@@ -117,11 +120,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this._templateLoader = templateLoader;
           this._compiling = MapWrapper.create();
           this._shadowDomStrategy = shadowDomStrategy;
-          this._shadowDomDirectives = [];
-          var types = shadowDomStrategy.polyfillDirectives();
-          for (var i = 0; i < types.length; i++) {
-            ListWrapper.push(this._shadowDomDirectives, reader.read(types[i]));
-          }
           this._templateResolver = templateResolver;
           this._componentUrlMapper = componentUrlMapper;
           this._urlResolver = urlResolver;
@@ -131,12 +129,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         return ($traceurRuntime.createClass)(Compiler, {
           createSteps: function(component, template) {
             var $__0 = this;
-            var dirMetadata = [];
-            var tplMetadata = ListWrapper.map(this._flattenDirectives(template), (function(d) {
+            var dirMetadata = ListWrapper.map(this._flattenDirectives(template), (function(d) {
               return $__0._reader.read(d);
             }));
-            dirMetadata = ListWrapper.concat(dirMetadata, tplMetadata);
-            dirMetadata = ListWrapper.concat(dirMetadata, this._shadowDomDirectives);
             var cmpMetadata = this._reader.read(component);
             var templateUrl = this._templateLoader.getTemplateUrl(template);
             return assert.returnType((createDefaultSteps(this._changeDetection, this._parser, cmpMetadata, dirMetadata, this._shadowDomStrategy, templateUrl, this._cssProcessor)), assert.genericType(List, CompileStep));
@@ -186,7 +181,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             var nestedPVPromises = [];
             for (var i = 0; i < compileElements.length; i++) {
               var ce = compileElements[i];
-              if (isPresent(ce.componentDirective)) {
+              if (ce.hasNestedView) {
                 this._compileNestedProtoView(ce, nestedPVPromises);
               }
             }
@@ -237,6 +232,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           }
         }, {});
       }()));
+      Object.defineProperty(Compiler, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(Compiler, "parameters", {get: function() {
           return [[ChangeDetection], [TemplateLoader], [DirectiveMetadataReader], [Parser], [CompilerCache], [ShadowDomStrategy], [TemplateResolver], [ComponentUrlMapper], [UrlResolver], [CssProcessor]];
         }});

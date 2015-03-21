@@ -31,6 +31,28 @@ System.register(["angular2/test_lib", "angular2/forms"], function($__export) {
             expect(c.errors).toEqual({"required": true});
           }));
         }));
+        describe("pristine", (function() {
+          it("should be true after creating a control", (function() {
+            var c = new Control("value");
+            expect(c.pristine).toEqual(true);
+          }));
+          it("should be false after changing the value of the control", (function() {
+            var c = new Control("value");
+            c.updateValue("new value");
+            expect(c.pristine).toEqual(false);
+          }));
+        }));
+        describe("dirty", (function() {
+          it("should be false after creating a control", (function() {
+            var c = new Control("value");
+            expect(c.dirty).toEqual(false);
+          }));
+          it("should be true after changing the value of the control", (function() {
+            var c = new Control("value");
+            c.updateValue("new value");
+            expect(c.dirty).toEqual(true);
+          }));
+        }));
       }));
       describe("ControlGroup", (function() {
         describe("value", (function() {
@@ -82,6 +104,19 @@ System.register(["angular2/test_lib", "angular2/forms"], function($__export) {
             c.updateValue("some value");
             expect(g.valid).toEqual(true);
             expect(g.errors).toEqual(null);
+          }));
+        }));
+        describe("pristine", (function() {
+          it("should be true after creating a control", (function() {
+            var c = new Control('value');
+            var g = new ControlGroup({"one": c});
+            expect(g.pristine).toEqual(true);
+          }));
+          it("should be false after changing the value of the control", (function() {
+            var c = new Control('value');
+            var g = new ControlGroup({"one": c});
+            c.updateValue('new value');
+            expect(g.pristine).toEqual(false);
           }));
         }));
         describe("optional components", (function() {

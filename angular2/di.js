@@ -5,6 +5,7 @@ System.register(["./src/di/annotations", "./src/di/injector", "./src/di/binding"
       $__export("Inject", $__m.Inject);
       $__export("InjectPromise", $__m.InjectPromise);
       $__export("InjectLazy", $__m.InjectLazy);
+      $__export("Injectable", $__m.Injectable);
       $__export("Optional", $__m.Optional);
       $__export("DependencyAnnotation", $__m.DependencyAnnotation);
     }, function($__m) {

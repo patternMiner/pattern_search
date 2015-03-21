@@ -30,6 +30,9 @@ System.register(["rtts_assert/rtts_assert"], function($__export) {
   function isString(obj) {
     return assert.returnType((typeof obj === "string"), assert.type.boolean);
   }
+  function isFunction(obj) {
+    return assert.returnType((typeof obj === "function"), assert.type.boolean);
+  }
   function stringify(token) {
     if (typeof token === 'string') {
       return assert.returnType((token), assert.type.string);
@@ -67,6 +70,7 @@ System.register(["rtts_assert/rtts_assert"], function($__export) {
   $__export("isPresent", isPresent);
   $__export("isBlank", isBlank);
   $__export("isString", isString);
+  $__export("isFunction", isFunction);
   $__export("stringify", stringify);
   $__export("looseIdentical", looseIdentical);
   $__export("getMapKey", getMapKey);
@@ -309,6 +313,7 @@ System.register(["rtts_assert/rtts_assert"], function($__export) {
             return input.match(regExp.single);
           },
           matcher: function(regExp, input) {
+            regExp.multiple.lastIndex = 0;
             return {
               re: regExp.multiple,
               input: input

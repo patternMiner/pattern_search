@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "angular2/src/facade/collection"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       Type,
       isPresent,
       Map,
@@ -10,6 +11,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       Type = $__m.Type;
       isPresent = $__m.isPresent;
@@ -25,6 +28,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             return assert.returnType(('./'), assert.type.string);
           }}, {});
       }()));
+      Object.defineProperty(ComponentUrlMapper, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(ComponentUrlMapper.prototype.getUrl, "parameters", {get: function() {
           return [[Type]];
         }});

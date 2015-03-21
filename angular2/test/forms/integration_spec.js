@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/change_detection", "angular2/src/core/compiler/compiler", "angular2/src/core/compiler/directive_metadata_reader", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/core/compiler/template_loader", "angular2/src/core/compiler/component_url_mapper", "angular2/src/core/compiler/url_resolver", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/css_processor", "angular2/src/mock/template_resolver_mock", "angular2/di", "angular2/core", "angular2/forms", "angular2/src/forms/validators"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/dom/dom_adapter", "angular2/change_detection", "angular2/src/core/compiler/compiler", "angular2/src/core/compiler/directive_metadata_reader", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/core/compiler/template_loader", "angular2/src/core/compiler/component_url_mapper", "angular2/src/core/compiler/url_resolver", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/css_processor", "angular2/src/mock/template_resolver_mock", "angular2/di", "angular2/angular2", "angular2/forms", "angular2/src/forms/validators"], function($__export) {
   "use strict";
   var assert,
       afterEach,
@@ -14,7 +14,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
       it,
       queryView,
       xit,
-      IS_NODEJS,
+      DOM,
       Lexer,
       Parser,
       ChangeDetector,
@@ -58,7 +58,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
       }));
       compiler.compile(componentType).then((function(pv) {
         var view = pv.instantiate(null, null);
-        view.hydrate(new Injector([]), null, context);
+        view.hydrate(new Injector([]), null, null, context, null);
         detectChanges(view);
         callback(view);
       }));
@@ -73,7 +73,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
           async.done();
         }));
       })));
-      if (!IS_NODEJS) {
+      if (DOM.supportsDOMEvents()) {
         it("should update the control group values on DOM change", inject([AsyncTestCompleter], (function(async) {
           var form = new ControlGroup({"login": new Control("oldValue")});
           var ctx = new MyComp(form);
@@ -114,7 +114,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
           async.done();
         }));
       })));
-      if (!IS_NODEJS) {
+      if (DOM.supportsDOMEvents()) {
         describe("different control types", (function() {
           it("should support type=checkbox", inject([AsyncTestCompleter], (function(async) {
             var ctx = new MyComp(new ControlGroup({"checkbox": new Control(true)}));
@@ -125,6 +125,33 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
               input.checked = false;
               dispatchEvent(input, "change");
               expect(ctx.form.value).toEqual({"checkbox": false});
+              async.done();
+            }));
+          })));
+          it("should support textarea", inject([AsyncTestCompleter], (function(async) {
+            var ctx = new MyComp(new ControlGroup({"text": new Control('old')}));
+            var t = "<div [control-group]=\"form\">\n                    <textarea control=\"text\"></textarea>\n                  </div>";
+            compile(MyComp, t, ctx, (function(view) {
+              var textarea = queryView(view, "textarea");
+              expect(textarea.value).toEqual("old");
+              textarea.value = "new";
+              dispatchEvent(textarea, "change");
+              expect(ctx.form.value).toEqual({"text": 'new'});
+              async.done();
+            }));
+          })));
+          it("should support select", inject([AsyncTestCompleter], (function(async) {
+            var ctx = new MyComp(new ControlGroup({"city": new Control("SF")}));
+            var t = "<div [control-group]=\"form\">\n                      <select control=\"city\">\n                        <option value=\"SF\"></option>\n                        <option value=\"NYC\"></option>\n                      </select>\n                    </div>";
+            compile(MyComp, t, ctx, (function(view) {
+              var select = queryView(view, "select");
+              var sfOption = queryView(view, "option");
+              expect(select.value).toEqual('SF');
+              expect(sfOption.selected).toBe(true);
+              select.value = 'NYC';
+              dispatchEvent(select, "change");
+              expect(ctx.form.value).toEqual({"city": 'NYC'});
+              expect(sfOption.selected).toBe(false);
               async.done();
             }));
           })));
@@ -181,7 +208,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
             async.done();
           }));
         })));
-        if (!IS_NODEJS) {
+        if (DOM.supportsDOMEvents()) {
           it("should update the control group values on DOM change", inject([AsyncTestCompleter], (function(async) {
             var form = new ControlGroup({"nested": new ControlGroup({"login": new Control("value")})});
             var ctx = new MyComp(form);
@@ -216,7 +243,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/chang
       it = $__m.it;
       queryView = $__m.queryView;
       xit = $__m.xit;
-      IS_NODEJS = $__m.IS_NODEJS;
+    }, function($__m) {
+      DOM = $__m.DOM;
     }, function($__m) {
       Lexer = $__m.Lexer;
       Parser = $__m.Parser;

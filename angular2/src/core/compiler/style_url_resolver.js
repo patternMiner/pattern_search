@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "./url_resolver"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "./url_resolver"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       RegExp,
       RegExpWrapper,
       StringWrapper,
@@ -12,6 +13,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "./url_r
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       RegExp = $__m.RegExp;
       RegExpWrapper = $__m.RegExpWrapper;
@@ -45,6 +48,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "./url_r
           }
         }, {});
       }()));
+      Object.defineProperty(StyleUrlResolver, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(StyleUrlResolver, "parameters", {get: function() {
           return [[UrlResolver]];
         }});

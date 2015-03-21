@@ -1,10 +1,13 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/facade/async", "angular2/src/dom/dom_adapter", "./view", "./shadow_dom_emulation/content_tag", "./shadow_dom_emulation/light_dom", "./shadow_dom_emulation/shadow_css", "./style_inliner", "./style_url_resolver", "./directive_metadata", "./pipeline/compile_step", "./pipeline/compile_element", "./pipeline/compile_control"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/facade/async", "angular2/src/dom/dom_adapter", "./view", "./shadow_dom_emulation/light_dom", "./shadow_dom_emulation/shadow_css", "./style_inliner", "./style_url_resolver", "./directive_metadata", "./pipeline/compile_step", "./pipeline/compile_element", "./pipeline/compile_control"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       Type,
       isBlank,
       isPresent,
       int,
+      StringWrapper,
+      assertionsEnabled,
       List,
       ListWrapper,
       MapWrapper,
@@ -12,7 +15,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       PromiseWrapper,
       DOM,
       viewModule,
-      Content,
       LightDom,
       ShadowCss,
       StyleInliner,
@@ -21,10 +23,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       NS,
       CompileElement,
       CompileControl,
+      _EMPTY_STEP,
       ShadowDomStrategy,
       EmulatedUnscopedShadowDomStrategy,
       EmulatedScopedShadowDomStrategy,
       NativeShadowDomStrategy,
+      _BaseEmulatedShadowDomStep,
+      _EmptyCompileStep,
       _ShimShadowDomStep,
       _EmulatedUnscopedCssStep,
       _EmulatedScopedCssStep,
@@ -33,6 +38,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       _nextComponentUID,
       _sharedStyleTexts,
       _lastInsertedStyleEl;
+  function _emptyStep() {
+    if (isBlank(_EMPTY_STEP)) {
+      _EMPTY_STEP = new _EmptyCompileStep();
+    }
+    return _EMPTY_STEP;
+  }
   function _moveViewNodesIntoParent(parent, view) {
     for (var i = 0; i < view.nodes.length; ++i) {
       DOM.appendChild(parent, view.nodes[i]);
@@ -85,10 +96,14 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     setters: [function($__m) {
       assert = $__m.assert;
     }, function($__m) {
+      Injectable = $__m.Injectable;
+    }, function($__m) {
       Type = $__m.Type;
       isBlank = $__m.isBlank;
       isPresent = $__m.isPresent;
       int = $__m.int;
+      StringWrapper = $__m.StringWrapper;
+      assertionsEnabled = $__m.assertionsEnabled;
     }, function($__m) {
       List = $__m.List;
       ListWrapper = $__m.ListWrapper;
@@ -100,8 +115,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       DOM = $__m.DOM;
     }, function($__m) {
       viewModule = $__m;
-    }, function($__m) {
-      Content = $__m.Content;
     }, function($__m) {
       LightDom = $__m.LightDom;
     }, function($__m) {
@@ -130,16 +143,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             assert.argumentTypes(lightDomView, viewModule.View, shadowDomView, viewModule.View, el, assert.type.any);
             return assert.returnType((null), LightDom);
           },
-          polyfillDirectives: function() {
-            return assert.returnType(([]), assert.genericType(List, Type));
-          },
           getStyleCompileStep: function(cmpMetadata, templateUrl) {
             assert.argumentTypes(cmpMetadata, DirectiveMetadata, templateUrl, assert.type.string);
-            return assert.returnType((null), NS.CompileStep);
+            return assert.returnType((_emptyStep()), NS.CompileStep);
           },
           getTemplateCompileStep: function(cmpMetadata) {
             assert.argumentTypes(cmpMetadata, DirectiveMetadata);
-            return assert.returnType((null), NS.CompileStep);
+            return assert.returnType((_emptyStep()), NS.CompileStep);
           },
           shimAppElement: function(cmpMetadata, element) {
             assert.argumentTypes(cmpMetadata, DirectiveMetadata, element, assert.type.any);
@@ -178,15 +188,19 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             assert.argumentTypes(lightDomView, viewModule.View, shadowDomView, viewModule.View, el, assert.type.any);
             return assert.returnType((new LightDom(lightDomView, shadowDomView, el)), LightDom);
           },
-          polyfillDirectives: function() {
-            return assert.returnType(([Content]), assert.genericType(List, Type));
-          },
           getStyleCompileStep: function(cmpMetadata, templateUrl) {
             assert.argumentTypes(cmpMetadata, DirectiveMetadata, templateUrl, assert.type.string);
             return assert.returnType((new _EmulatedUnscopedCssStep(cmpMetadata, templateUrl, this._styleUrlResolver, this._styleHost)), NS.CompileStep);
+          },
+          getTemplateCompileStep: function(cmpMetadata) {
+            assert.argumentTypes(cmpMetadata, DirectiveMetadata);
+            return assert.returnType((new _BaseEmulatedShadowDomStep()), NS.CompileStep);
           }
         }, {}, $__super);
       }(ShadowDomStrategy)));
+      Object.defineProperty(EmulatedUnscopedShadowDomStrategy, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(EmulatedUnscopedShadowDomStrategy, "parameters", {get: function() {
           return [[StyleUrlResolver], []];
         }});
@@ -198,6 +212,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         }});
       Object.defineProperty(EmulatedUnscopedShadowDomStrategy.prototype.getStyleCompileStep, "parameters", {get: function() {
           return [[DirectiveMetadata], [assert.type.string]];
+        }});
+      Object.defineProperty(EmulatedUnscopedShadowDomStrategy.prototype.getTemplateCompileStep, "parameters", {get: function() {
+          return [[DirectiveMetadata]];
         }});
       EmulatedScopedShadowDomStrategy = $__export("EmulatedScopedShadowDomStrategy", (function($__super) {
         var EmulatedScopedShadowDomStrategy = function EmulatedScopedShadowDomStrategy(styleInliner, styleUrlResolver, styleHost) {
@@ -222,6 +239,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           }
         }, {}, $__super);
       }(EmulatedUnscopedShadowDomStrategy)));
+      Object.defineProperty(EmulatedScopedShadowDomStrategy, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(EmulatedScopedShadowDomStrategy, "parameters", {get: function() {
           return [[StyleInliner], [StyleUrlResolver], []];
         }});
@@ -251,6 +271,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           }
         }, {}, $__super);
       }(ShadowDomStrategy)));
+      Object.defineProperty(NativeShadowDomStrategy, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(NativeShadowDomStrategy, "parameters", {get: function() {
           return [[StyleUrlResolver]];
         }});
@@ -259,6 +282,46 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         }});
       Object.defineProperty(NativeShadowDomStrategy.prototype.getStyleCompileStep, "parameters", {get: function() {
           return [[DirectiveMetadata], [assert.type.string]];
+        }});
+      _BaseEmulatedShadowDomStep = (function($__super) {
+        var _BaseEmulatedShadowDomStep = function _BaseEmulatedShadowDomStep() {
+          $traceurRuntime.superConstructor(_BaseEmulatedShadowDomStep).apply(this, arguments);
+        };
+        return ($traceurRuntime.createClass)(_BaseEmulatedShadowDomStep, {process: function(parent, current, control) {
+            assert.argumentTypes(parent, CompileElement, current, CompileElement, control, CompileControl);
+            if (current.ignoreBindings) {
+              return ;
+            }
+            var nodeName = DOM.nodeName(current.element);
+            if (StringWrapper.equals(nodeName.toUpperCase(), 'CONTENT')) {
+              var attrs = current.attrs();
+              var selector = MapWrapper.get(attrs, 'select');
+              current.contentTagSelector = isPresent(selector) ? selector : '';
+              var contentStart = DOM.createScriptTag('type', 'ng/contentStart');
+              if (assertionsEnabled()) {
+                DOM.setAttribute(contentStart, 'select', current.contentTagSelector);
+              }
+              var contentEnd = DOM.createScriptTag('type', 'ng/contentEnd');
+              DOM.insertBefore(current.element, contentStart);
+              DOM.insertBefore(current.element, contentEnd);
+              DOM.remove(current.element);
+              current.element = contentStart;
+            }
+          }}, {}, $__super);
+      }(NS.CompileStep));
+      Object.defineProperty(_BaseEmulatedShadowDomStep.prototype.process, "parameters", {get: function() {
+          return [[CompileElement], [CompileElement], [CompileControl]];
+        }});
+      _EmptyCompileStep = (function($__super) {
+        var _EmptyCompileStep = function _EmptyCompileStep() {
+          $traceurRuntime.superConstructor(_EmptyCompileStep).apply(this, arguments);
+        };
+        return ($traceurRuntime.createClass)(_EmptyCompileStep, {process: function(parent, current, control) {
+            assert.argumentTypes(parent, CompileElement, current, CompileElement, control, CompileControl);
+          }}, {}, $__super);
+      }(NS.CompileStep));
+      Object.defineProperty(_EmptyCompileStep.prototype.process, "parameters", {get: function() {
+          return [[CompileElement], [CompileElement], [CompileControl]];
         }});
       _ShimShadowDomStep = (function($__super) {
         var _ShimShadowDomStep = function _ShimShadowDomStep(cmpMetadata) {
@@ -269,6 +332,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         };
         return ($traceurRuntime.createClass)(_ShimShadowDomStep, {process: function(parent, current, control) {
             assert.argumentTypes(parent, CompileElement, current, CompileElement, control, CompileControl);
+            $traceurRuntime.superGet(this, _ShimShadowDomStep.prototype, "process").call(this, parent, current, control);
             if (current.ignoreBindings) {
               return ;
             }
@@ -280,7 +344,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               DOM.setAttribute(current.element, hostAttribute, '');
             }
           }}, {}, $__super);
-      }(NS.CompileStep));
+      }(_BaseEmulatedShadowDomStep));
       Object.defineProperty(_ShimShadowDomStep, "parameters", {get: function() {
           return [[DirectiveMetadata]];
         }});

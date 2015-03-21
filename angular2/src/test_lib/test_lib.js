@@ -10,7 +10,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/dom/dom_adapter", "ang
       afterEach,
       expect,
       IS_DARTIUM,
-      IS_NODEJS,
       AsyncTestCompleter,
       jsmBeforeEach,
       jsmDescribe,
@@ -108,31 +107,24 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/dom/dom_adapter", "ang
       var children = DOM.childNodes(n);
       return children && children.length > 0;
     });
-    if (!IS_NODEJS) {
-      if (n instanceof Comment)
-        return '';
-      if (n instanceof Array)
-        return n.map((function(nn) {
-          return elementText(nn);
-        })).join("");
-      if (n instanceof Element && DOM.tagName(n) == 'CONTENT')
-        return elementText(Array.prototype.slice.apply(n.getDistributedNodes()));
-      if (DOM.hasShadowRoot(n))
-        return elementText(DOM.childNodesAsList(n.shadowRoot));
-      if (hasNodes(n))
-        return elementText(DOM.childNodesAsList(n));
-      return n.textContent;
-    } else {
-      if (n instanceof Array) {
-        return n.map((function(nn) {
-          return elementText(nn);
-        })).join("");
-      } else if (hasNodes(n)) {
-        return elementText(DOM.childNodesAsList(n));
-      } else {
-        return DOM.getText(n);
-      }
+    if (n instanceof Array) {
+      return n.map((function(nn) {
+        return elementText(nn);
+      })).join("");
     }
+    if (DOM.isCommentNode(n)) {
+      return '';
+    }
+    if (DOM.isElementNode(n) && DOM.tagName(n) == 'CONTENT') {
+      return elementText(Array.prototype.slice.apply(DOM.getDistributedNodes(n)));
+    }
+    if (DOM.hasShadowRoot(n)) {
+      return elementText(DOM.childNodesAsList(DOM.getShadowRoot(n)));
+    }
+    if (hasNodes(n)) {
+      return elementText(DOM.childNodesAsList(n));
+    }
+    return DOM.getText(n);
   }
   $__export("describe", describe);
   $__export("ddescribe", ddescribe);
@@ -161,7 +153,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/dom/dom_adapter", "ang
       afterEach = $__export("afterEach", _global.afterEach);
       expect = $__export("expect", _global.expect);
       IS_DARTIUM = $__export("IS_DARTIUM", false);
-      IS_NODEJS = $__export("IS_NODEJS", typeof window === 'undefined');
       AsyncTestCompleter = $__export("AsyncTestCompleter", (function() {
         var AsyncTestCompleter = function AsyncTestCompleter(done) {
           assert.argumentTypes(done, Function);

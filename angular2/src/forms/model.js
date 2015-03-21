@@ -31,7 +31,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           var validator = arguments[0] !== (void 0) ? arguments[0] : nullValidator;
           assert.argumentTypes(validator, Function);
           this.validator = validator;
-          this._dirty = true;
+          this._updateNeeded = true;
+          this._pristine = true;
         };
         return ($traceurRuntime.createClass)(AbstractControl, {
           get value() {
@@ -49,6 +50,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           get errors() {
             this._updateIfNeeded();
             return this._errors;
+          },
+          get pristine() {
+            this._updateIfNeeded();
+            return this._pristine;
+          },
+          get dirty() {
+            return !this.pristine;
           },
           setParent: function(parent) {
             this._parent = parent;
@@ -75,12 +83,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           updateValue: function(value) {
             assert.argumentTypes(value, assert.type.any);
             this._value = value;
-            this._dirty = true;
+            this._updateNeeded = true;
+            this._pristine = false;
             this._updateParent();
           },
           _updateIfNeeded: function() {
-            if (this._dirty) {
-              this._dirty = false;
+            if (this._updateNeeded) {
+              this._updateNeeded = false;
               this._errors = this.validator(this);
               this._status = isPresent(this._errors) ? INVALID : VALID;
             }
@@ -106,12 +115,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         return ($traceurRuntime.createClass)(ControlGroup, {
           include: function(controlName) {
             assert.argumentTypes(controlName, assert.type.string);
-            this._dirty = true;
+            this._updateNeeded = true;
             StringMapWrapper.set(this.optionals, controlName, true);
           },
           exclude: function(controlName) {
             assert.argumentTypes(controlName, assert.type.string);
-            this._dirty = true;
+            this._updateNeeded = true;
             StringMapWrapper.set(this.optionals, controlName, false);
           },
           contains: function(controlName) {
@@ -126,25 +135,38 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             }));
           },
           _updateIfNeeded: function() {
-            if (this._dirty) {
-              this._dirty = false;
+            if (this._updateNeeded) {
+              this._updateNeeded = false;
               this._value = this._reduceValue();
+              this._pristine = this._reducePristine();
               this._errors = this.validator(this);
               this._status = isPresent(this._errors) ? INVALID : VALID;
             }
           },
           _reduceValue: function() {
+            return this._reduceChildren({}, (function(acc, control, name) {
+              acc[name] = control.value;
+              return acc;
+            }));
+          },
+          _reducePristine: function() {
+            return this._reduceChildren(true, (function(acc, control, name) {
+              return acc && control.pristine;
+            }));
+          },
+          _reduceChildren: function(initValue, fn) {
             var $__0 = this;
-            var newValue = {};
+            assert.argumentTypes(initValue, assert.type.any, fn, Function);
+            var res = initValue;
             StringMapWrapper.forEach(this.controls, (function(control, name) {
               if ($__0._included(name)) {
-                newValue[name] = control.value;
+                res = fn(res, control, name);
               }
             }));
-            return newValue;
+            return res;
           },
           _controlChanged: function() {
-            this._dirty = true;
+            this._updateNeeded = true;
             this._updateParent();
           },
           _included: function(controlName) {
@@ -165,6 +187,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         }});
       Object.defineProperty(ControlGroup.prototype.contains, "parameters", {get: function() {
           return [[assert.type.string]];
+        }});
+      Object.defineProperty(ControlGroup.prototype._reduceChildren, "parameters", {get: function() {
+          return [[], [Function]];
         }});
       Object.defineProperty(ControlGroup.prototype._included, "parameters", {get: function() {
           return [[assert.type.string]];

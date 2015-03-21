@@ -9,7 +9,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       expect,
       iit,
       inject,
-      IS_NODEJS,
       it,
       xit,
       StringMapWrapper,
@@ -64,7 +63,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
         "scoped": new EmulatedScopedShadowDomStrategy(styleInliner, styleUrlResolver, DOM.createElement('div')),
         "unscoped": new EmulatedUnscopedShadowDomStrategy(styleUrlResolver, DOM.createElement('div'))
       };
-      if (!IS_NODEJS) {
+      if (DOM.supportsNativeShadowDOM()) {
         StringMapWrapper.set(strategies, "native", new NativeShadowDomStrategy(styleUrlResolver));
       }
       StringMapWrapper.forEach(strategies, (function(strategy, name) {
@@ -89,6 +88,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           Object.defineProperty(compile, "parameters", {get: function() {
               return [[], [assert.genericType(List, Type)], []];
             }});
+          it('should support simple components', inject([AsyncTestCompleter], (function(async) {
+            var temp = '<simple>' + '<div>A</div>' + '</simple>';
+            compile(temp, [Simple], (function(view, lc) {
+              expect(view.nodes).toHaveText('SIMPLE(A)');
+              async.done();
+            }));
+          })));
           it('should support multiple content tags', inject([AsyncTestCompleter], (function(async) {
             var temp = '<multiple-content-tags>' + '<div>B</div>' + '<div>C</div>' + '<div class="left">A</div>' + '</multiple-content-tags>';
             compile(temp, [MultipleContentTagsComponent], (function(view, lc) {
@@ -169,7 +175,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
   }
   function createView(pv) {
     var view = pv.instantiate(null, null);
-    view.hydrate(new Injector([]), null, {});
+    view.hydrate(new Injector([]), null, null, {}, null);
     return view;
   }
   $__export("main", main);
@@ -185,7 +191,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       expect = $__m.expect;
       iit = $__m.iit;
       inject = $__m.inject;
-      IS_NODEJS = $__m.IS_NODEJS;
       it = $__m.it;
       xit = $__m.xit;
     }, function($__m) {

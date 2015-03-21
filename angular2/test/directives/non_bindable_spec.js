@@ -49,7 +49,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
       function createView(pv) {
         component = new TestComponent();
         view = pv.instantiate(null, null);
-        view.hydrate(new Injector([]), null, component);
+        view.hydrate(new Injector([]), null, null, component, null);
         cd = view.changeDetector;
       }
       function compileWithTemplate(html) {

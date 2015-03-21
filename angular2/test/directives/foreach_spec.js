@@ -42,7 +42,7 @@ System.register(["angular2/test_lib", "angular2/src/dom/dom_adapter", "angular2/
       function createView(pv) {
         component = new TestComponent();
         view = pv.instantiate(null, null);
-        view.hydrate(new Injector([]), null, component);
+        view.hydrate(new Injector([]), null, null, component, null);
         cd = view.changeDetector;
       }
       function compileWithTemplate(html) {
@@ -164,13 +164,13 @@ System.register(["angular2/test_lib", "angular2/src/dom/dom_adapter", "angular2/
         }));
       })));
       it('should repeat over nested arrays', inject([AsyncTestCompleter], (function(async) {
-        compileWithTemplate('<div><div template="foreach #item in items">' + '<div template="foreach #subitem in item">' + '{{subitem}};' + '</div>|</div></div>').then((function(pv) {
+        compileWithTemplate('<div><div template="foreach #item in items">' + '<div template="foreach #subitem in item">' + '{{subitem}}-{{item.length}};' + '</div>|</div></div>').then((function(pv) {
           createView(pv);
-          component.items = [['a', 'b'], ['c', 'd']];
+          component.items = [['a', 'b'], ['c']];
           cd.detectChanges();
           cd.detectChanges();
           cd.detectChanges();
-          expect(DOM.getText(view.nodes[0])).toEqual('a;b;|c;d;|');
+          expect(DOM.getText(view.nodes[0])).toEqual('a-2;b-2;|c-1;|');
           async.done();
         }));
       })));

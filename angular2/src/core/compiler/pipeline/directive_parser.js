@@ -13,6 +13,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       SelectorMatcher,
       CssSelector,
       DirectiveMetadata,
+      DynamicComponent,
       Component,
       Viewport,
       CompileStep,
@@ -47,6 +48,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     return matchedProperties;
   }
   function checkDirectiveValidity(directive, current, isTemplateElement) {
+    var isComponent = directive.annotation instanceof Component || directive.annotation instanceof DynamicComponent;
+    var alreadyHasComponent = isPresent(current.componentDirective);
     if (directive.annotation instanceof Viewport) {
       if (!isTemplateElement) {
         throw new BaseException("Viewport directives need to be placed on <template> elements or elements " + ("with template attribute - check " + current.elementDescription));
@@ -55,7 +58,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       }
     } else if (isTemplateElement) {
       throw new BaseException(("Only template directives are allowed on template elements - check " + current.elementDescription));
-    } else if ((directive.annotation instanceof Component) && isPresent(current.componentDirective)) {
+    } else if (isComponent && alreadyHasComponent) {
       throw new BaseException(("Multiple component directives not allowed on the same element - check " + current.elementDescription));
     }
   }
@@ -97,6 +100,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     }, function($__m) {
       DirectiveMetadata = $__m.DirectiveMetadata;
     }, function($__m) {
+      DynamicComponent = $__m.DynamicComponent;
       Component = $__m.Component;
       Viewport = $__m.Viewport;
     }, function($__m) {
@@ -130,7 +134,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             var attrs = current.attrs();
             var classList = current.classList();
             var cssSelector = new CssSelector();
-            cssSelector.setElement(DOM.nodeName(current.element));
+            var nodeName = DOM.nodeName(current.element);
+            cssSelector.setElement(nodeName);
             for (var i = 0; i < classList.length; i++) {
               cssSelector.addClassName(classList[i]);
             }

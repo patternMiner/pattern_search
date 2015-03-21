@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "angular2/src/dom/browser_adapter", "angular2/src/dom/dom_adapter", "./compiler/compiler", "./compiler/view", "angular2/src/reflection/reflection", "angular2/change_detection", "./exception_handler", "./compiler/template_loader", "./compiler/template_resolver", "./compiler/directive_metadata_reader", "angular2/src/facade/collection", "angular2/src/facade/async", "angular2/src/core/zone/vm_turn_zone", "angular2/src/core/life_cycle/life_cycle", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/core/compiler/xhr/xhr", "angular2/src/core/compiler/xhr/xhr_impl", "angular2/src/core/events/event_manager", "angular2/src/core/events/hammer_gestures", "angular2/src/di/binding", "angular2/src/core/compiler/component_url_mapper", "angular2/src/core/compiler/url_resolver", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/style_inliner", "angular2/src/core/compiler/css_processor"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "angular2/src/dom/browser_adapter", "angular2/src/dom/dom_adapter", "./compiler/compiler", "./compiler/view", "angular2/src/reflection/reflection", "angular2/change_detection", "./exception_handler", "./compiler/template_loader", "./compiler/template_resolver", "./compiler/directive_metadata_reader", "angular2/src/facade/collection", "angular2/src/facade/async", "angular2/src/core/zone/vm_turn_zone", "angular2/src/core/life_cycle/life_cycle", "angular2/src/core/compiler/shadow_dom_strategy", "angular2/src/core/compiler/xhr/xhr", "angular2/src/core/compiler/xhr/xhr_impl", "angular2/src/core/events/event_manager", "angular2/src/core/events/hammer_gestures", "angular2/src/di/binding", "angular2/src/core/compiler/component_url_mapper", "angular2/src/core/compiler/url_resolver", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/style_inliner", "angular2/src/core/compiler/css_processor", "angular2/src/core/annotations/annotations"], function($__export) {
   "use strict";
   var assert,
       Injector,
@@ -10,6 +10,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/
       BaseException,
       assertionsEnabled,
       print,
+      stringify,
       BrowserDomAdapter,
       DOM,
       Compiler,
@@ -46,6 +47,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/
       StyleUrlResolver,
       StyleInliner,
       CssProcessor,
+      Component,
       _rootInjector,
       _rootBindings,
       appViewToken,
@@ -64,10 +66,15 @@ System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/
       }
       return element;
     }), [appComponentAnnotatedTypeToken, appDocumentToken]), bind(appViewToken).toAsyncFactory((function(changeDetection, compiler, injector, appElement, appComponentAnnotatedType, strategy, eventManager) {
+      var annotation = appComponentAnnotatedType.annotation;
+      if (!isBlank(annotation) && !(annotation instanceof Component)) {
+        var type = appComponentAnnotatedType.type;
+        throw new BaseException("Only Components can be bootstrapped; " + ("Directive of " + stringify(type) + " is not a Component"));
+      }
       return compiler.compile(appComponentAnnotatedType.type).then((function(protoView) {
         var appProtoView = ProtoView.createRootProtoView(protoView, appElement, appComponentAnnotatedType, changeDetection.createProtoChangeDetector('root'), strategy);
         var view = appProtoView.instantiate(null, eventManager);
-        view.hydrate(injector, null, new Object());
+        view.hydrate(injector, null, null, new Object(), null);
         return view;
       }));
     }), [ChangeDetection, Compiler, Injector, appElementToken, appComponentAnnotatedTypeToken, ShadowDomStrategy, EventManager]), bind(appChangeDetectorToken).toFactory((function(rootView) {
@@ -140,6 +147,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/
       BaseException = $__m.BaseException;
       assertionsEnabled = $__m.assertionsEnabled;
       print = $__m.print;
+      stringify = $__m.stringify;
     }, function($__m) {
       BrowserDomAdapter = $__m.BrowserDomAdapter;
     }, function($__m) {
@@ -201,6 +209,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/
       StyleInliner = $__m.StyleInliner;
     }, function($__m) {
       CssProcessor = $__m.CssProcessor;
+    }, function($__m) {
+      Component = $__m.Component;
     }],
     execute: function() {
       _rootBindings = [bind(Reflector).toValue(reflector)];

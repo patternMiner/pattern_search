@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/di"], function($__export) {
   "use strict";
   var assert,
       ABSTRACT,
@@ -7,8 +7,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       isPresent,
       ListWrapper,
       List,
+      Injectable,
       Directive,
       Component,
+      DynamicComponent,
       Decorator,
       Viewport,
       onDestroy,
@@ -24,18 +26,19 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     }, function($__m) {
       ListWrapper = $__m.ListWrapper;
       List = $__m.List;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }],
     execute: function() {
-      Directive = $__export("Directive", (function() {
+      Directive = $__export("Directive", (function($__super) {
         var Directive = function Directive() {
           var $__1 = arguments[0] !== (void 0) ? arguments[0] : {},
               selector = $__1.selector,
               bind = $__1.bind,
               events = $__1.events,
-              implementsTypes = $__1.implementsTypes,
               lifecycle = $__1.lifecycle;
+          $traceurRuntime.superConstructor(Directive).call(this);
           this.selector = selector;
-          this.implementsTypes = implementsTypes;
           this.bind = bind;
           this.events = events;
           this.lifecycle = lifecycle;
@@ -43,8 +46,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         return ($traceurRuntime.createClass)(Directive, {hasLifecycleHook: function(hook) {
             assert.argumentTypes(hook, assert.type.string);
             return assert.returnType((isPresent(this.lifecycle) ? ListWrapper.contains(this.lifecycle, hook) : false), assert.type.boolean);
-          }}, {});
-      }()));
+          }}, {}, $__super);
+      }(Injectable)));
       Object.defineProperty(Directive, "annotations", {get: function() {
           return [new ABSTRACT(), new CONST()];
         }});
@@ -58,13 +61,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               bind = $__1.bind,
               events = $__1.events,
               services = $__1.services,
-              implementsTypes = $__1.implementsTypes,
               lifecycle = $__1.lifecycle;
           $traceurRuntime.superConstructor(Component).call(this, {
             selector: selector,
             bind: bind,
             events: events,
-            implementsTypes: implementsTypes,
             lifecycle: lifecycle
           });
           this.services = services;
@@ -74,6 +75,27 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       Object.defineProperty(Component, "annotations", {get: function() {
           return [new CONST()];
         }});
+      DynamicComponent = $__export("DynamicComponent", (function($__super) {
+        var DynamicComponent = function DynamicComponent() {
+          var $__1 = arguments[0] !== (void 0) ? arguments[0] : {},
+              selector = $__1.selector,
+              bind = $__1.bind,
+              events = $__1.events,
+              services = $__1.services,
+              lifecycle = $__1.lifecycle;
+          $traceurRuntime.superConstructor(DynamicComponent).call(this, {
+            selector: selector,
+            bind: bind,
+            events: events,
+            lifecycle: lifecycle
+          });
+          this.services = services;
+        };
+        return ($traceurRuntime.createClass)(DynamicComponent, {}, {}, $__super);
+      }(Directive)));
+      Object.defineProperty(DynamicComponent, "annotations", {get: function() {
+          return [new CONST()];
+        }});
       Decorator = $__export("Decorator", (function($__super) {
         var Decorator = function Decorator() {
           var $__2;
@@ -81,7 +103,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               selector = $__1.selector,
               bind = $__1.bind,
               events = $__1.events,
-              implementsTypes = $__1.implementsTypes,
               lifecycle = $__1.lifecycle,
               compileChildren = ($__2 = $__1.compileChildren) === void 0 ? true : $__2;
           this.compileChildren = compileChildren;
@@ -89,7 +110,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             selector: selector,
             bind: bind,
             events: events,
-            implementsTypes: implementsTypes,
             lifecycle: lifecycle
           });
         };
@@ -104,13 +124,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               selector = $__1.selector,
               bind = $__1.bind,
               events = $__1.events,
-              implementsTypes = $__1.implementsTypes,
               lifecycle = $__1.lifecycle;
           $traceurRuntime.superConstructor(Viewport).call(this, {
             selector: selector,
             bind: bind,
             events: events,
-            implementsTypes: implementsTypes,
             lifecycle: lifecycle
           });
         };

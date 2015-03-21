@@ -168,11 +168,17 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           process: function(parent, current, control) {
             assert.argumentTypes(parent, CompileElement, current, CompileElement, control, CompileControl);
             var elementBinder = null;
+            var parentElementBinder = null;
+            var distanceToParentBinder = this._getDistanceToParentBinder(parent, current);
+            if (isPresent(parent)) {
+              parentElementBinder = parent.inheritedElementBinder;
+            }
             if (current.hasBindings) {
               var protoView = current.inheritedProtoView;
               var protoInjectorWasBuilt = isBlank(parent) ? true : current.inheritedProtoElementInjector !== parent.inheritedProtoElementInjector;
               var currentProtoElementInjector = protoInjectorWasBuilt ? current.inheritedProtoElementInjector : null;
-              elementBinder = protoView.bindElement(currentProtoElementInjector, current.componentDirective, current.viewportDirective);
+              elementBinder = protoView.bindElement(parentElementBinder, distanceToParentBinder, currentProtoElementInjector, current.componentDirective, current.viewportDirective);
+              current.distanceToParentBinder = 0;
               if (isPresent(current.textNodeBindings)) {
                 this._bindTextNodes(protoView, current);
               }
@@ -182,13 +188,20 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               if (isPresent(current.eventBindings)) {
                 this._bindEvents(protoView, current);
               }
+              if (isPresent(current.contentTagSelector)) {
+                elementBinder.contentTagSelector = current.contentTagSelector;
+              }
               var directives = current.getAllDirectives();
               this._bindDirectiveProperties(directives, current);
               this._bindDirectiveEvents(directives, current);
             } else if (isPresent(parent)) {
-              elementBinder = parent.inheritedElementBinder;
+              elementBinder = parentElementBinder;
+              current.distanceToParentBinder = distanceToParentBinder;
             }
             current.inheritedElementBinder = elementBinder;
+          },
+          _getDistanceToParentBinder: function(parent, current) {
+            return isPresent(parent) ? parent.distanceToParentBinder + 1 : 0;
           },
           _bindTextNodes: function(protoView, compileElement) {
             MapWrapper.forEach(compileElement.textNodeBindings, (function(expression, indexInParent) {

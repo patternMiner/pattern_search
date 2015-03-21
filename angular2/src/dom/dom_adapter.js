@@ -165,6 +165,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang"], functio
           getShadowRoot: function(el) {
             throw _abstract();
           },
+          getDistributedNodes: function(el) {
+            throw _abstract();
+          },
           clone: function(node) {
             throw _abstract();
           },
@@ -285,6 +288,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang"], functio
           },
           cssToRules: function(css) {
             assert.argumentTypes(css, assert.type.string);
+            throw _abstract();
+          },
+          supportsDOMEvents: function() {
+            throw _abstract();
+          },
+          supportsNativeShadowDOM: function() {
             throw _abstract();
           }
         }, {});

@@ -5,6 +5,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       List,
       ListWrapper,
       isPresent,
+      isFunction,
       DomAdapter,
       GenericBrowserDomAdapter;
   return {
@@ -13,6 +14,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     }, function($__m) {
       ABSTRACT = $__m.ABSTRACT;
       isPresent = $__m.isPresent;
+      isFunction = $__m.isFunction;
     }, function($__m) {
       List = $__m.List;
       ListWrapper = $__m.ListWrapper;
@@ -25,6 +27,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           $traceurRuntime.superConstructor(GenericBrowserDomAdapter).apply(this, arguments);
         };
         return ($traceurRuntime.createClass)(GenericBrowserDomAdapter, {
+          getDistributedNodes: function(el) {
+            return el.getDistributedNodes();
+          },
           resolveAndSetHref: function(el, baseUrl, href) {
             assert.argumentTypes(el, assert.type.any, baseUrl, assert.type.string, href, assert.type.string);
             el.href = href == null ? baseUrl : baseUrl + '/../' + href;
@@ -45,6 +50,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             } else {}
             this.remove(style);
             return assert.returnType((rules), List);
+          },
+          supportsDOMEvents: function() {
+            return assert.returnType((true), assert.type.boolean);
+          },
+          supportsNativeShadowDOM: function() {
+            return assert.returnType((isFunction(this.defaultDoc().body.createShadowRoot)), assert.type.boolean);
           }
         }, {}, $__super);
       }(DomAdapter)));

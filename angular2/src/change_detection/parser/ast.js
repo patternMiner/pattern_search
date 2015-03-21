@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./context_with_variable_bindings"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection"], function($__export) {
   "use strict";
   var assert,
       autoConvertAdd,
@@ -10,7 +10,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       Map,
       ListWrapper,
       StringMapWrapper,
-      ContextWithVariableBindings,
       AST,
       EmptyExpr,
       ImplicitReceiver,
@@ -32,12 +31,15 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       TemplateBinding,
       AstVisitor,
       _evalListCache;
-  function evalList(context, exps) {
-    assert.argumentTypes(context, assert.type.any, exps, List);
+  function evalList(context, locals, exps) {
+    assert.argumentTypes(context, assert.type.any, locals, assert.type.any, exps, List);
     var length = exps.length;
+    if (length > 10) {
+      throw new BaseException("Cannot have more than 10 argument");
+    }
     var result = _evalListCache[length];
     for (var i = 0; i < length; i++) {
-      result[i] = exps[i].eval(context);
+      result[i] = exps[i].eval(context, locals);
     }
     return result;
   }
@@ -55,20 +57,18 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       Map = $__m.Map;
       ListWrapper = $__m.ListWrapper;
       StringMapWrapper = $__m.StringMapWrapper;
-    }, function($__m) {
-      ContextWithVariableBindings = $__m.ContextWithVariableBindings;
     }],
     execute: function() {
       AST = $__export("AST", (function() {
         var AST = function AST() {};
         return ($traceurRuntime.createClass)(AST, {
-          eval: function(context) {
+          eval: function(context, locals) {
             throw new BaseException("Not supported");
           },
           get isAssignable() {
             return false;
           },
-          assign: function(context, value) {
+          assign: function(context, locals, value) {
             throw new BaseException("Not supported");
           },
           visit: function(visitor) {},
@@ -82,7 +82,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           $traceurRuntime.superConstructor(EmptyExpr).apply(this, arguments);
         };
         return ($traceurRuntime.createClass)(EmptyExpr, {
-          eval: function(context) {
+          eval: function(context, locals) {
             return null;
           },
           visit: function(visitor) {}
@@ -93,7 +93,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           $traceurRuntime.superConstructor(ImplicitReceiver).apply(this, arguments);
         };
         return ($traceurRuntime.createClass)(ImplicitReceiver, {
-          eval: function(context) {
+          eval: function(context, locals) {
             return context;
           },
           visit: function(visitor) {
@@ -108,10 +108,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.expressions = expressions;
         };
         return ($traceurRuntime.createClass)(Chain, {
-          eval: function(context) {
+          eval: function(context, locals) {
             var result;
             for (var i = 0; i < this.expressions.length; i++) {
-              var last = this.expressions[i].eval(context);
+              var last = this.expressions[i].eval(context, locals);
               if (isPresent(last))
                 result = last;
             }
@@ -134,11 +134,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.falseExp = falseExp;
         };
         return ($traceurRuntime.createClass)(Conditional, {
-          eval: function(context) {
-            if (this.condition.eval(context)) {
-              return this.trueExp.eval(context);
+          eval: function(context, locals) {
+            if (this.condition.eval(context, locals)) {
+              return this.trueExp.eval(context, locals);
             } else {
-              return this.falseExp.eval(context);
+              return this.falseExp.eval(context, locals);
             }
           },
           visit: function(visitor) {
@@ -159,28 +159,24 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.setter = setter;
         };
         return ($traceurRuntime.createClass)(AccessMember, {
-          eval: function(context) {
-            var evaluatedContext = this.receiver.eval(context);
-            while (evaluatedContext instanceof ContextWithVariableBindings) {
-              if (evaluatedContext.hasBinding(this.name)) {
-                return evaluatedContext.get(this.name);
-              }
-              evaluatedContext = evaluatedContext.parent;
+          eval: function(context, locals) {
+            if (this.receiver instanceof ImplicitReceiver && isPresent(locals) && locals.contains(this.name)) {
+              return locals.get(this.name);
+            } else {
+              var evaluatedReceiver = this.receiver.eval(context, locals);
+              return this.getter(evaluatedReceiver);
             }
-            return this.getter(evaluatedContext);
           },
           get isAssignable() {
             return true;
           },
-          assign: function(context, value) {
-            var evaluatedContext = this.receiver.eval(context);
-            while (evaluatedContext instanceof ContextWithVariableBindings) {
-              if (evaluatedContext.hasBinding(this.name)) {
-                throw new BaseException(("Cannot reassign a variable binding " + this.name));
-              }
-              evaluatedContext = evaluatedContext.parent;
+          assign: function(context, locals, value) {
+            var evaluatedContext = this.receiver.eval(context, locals);
+            if (this.receiver instanceof ImplicitReceiver && isPresent(locals) && locals.contains(this.name)) {
+              throw new BaseException(("Cannot reassign a variable binding " + this.name));
+            } else {
+              return this.setter(evaluatedContext, value);
             }
-            return this.setter(evaluatedContext, value);
           },
           visit: function(visitor) {
             return visitor.visitAccessMember(this);
@@ -198,17 +194,17 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.key = key;
         };
         return ($traceurRuntime.createClass)(KeyedAccess, {
-          eval: function(context) {
-            var obj = this.obj.eval(context);
-            var key = this.key.eval(context);
+          eval: function(context, locals) {
+            var obj = this.obj.eval(context, locals);
+            var key = this.key.eval(context, locals);
             return obj[key];
           },
           get isAssignable() {
             return true;
           },
-          assign: function(context, value) {
-            var obj = this.obj.eval(context);
-            var key = this.key.eval(context);
+          assign: function(context, locals, value) {
+            var obj = this.obj.eval(context, locals);
+            var key = this.key.eval(context, locals);
             obj[key] = value;
             return value;
           },
@@ -241,7 +237,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.value = value;
         };
         return ($traceurRuntime.createClass)(LiteralPrimitive, {
-          eval: function(context) {
+          eval: function(context, locals) {
             return this.value;
           },
           visit: function(visitor) {
@@ -256,9 +252,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.expressions = expressions;
         };
         return ($traceurRuntime.createClass)(LiteralArray, {
-          eval: function(context) {
+          eval: function(context, locals) {
             return ListWrapper.map(this.expressions, (function(e) {
-              return e.eval(context);
+              return e.eval(context, locals);
             }));
           },
           visit: function(visitor) {
@@ -277,10 +273,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.values = values;
         };
         return ($traceurRuntime.createClass)(LiteralMap, {
-          eval: function(context) {
+          eval: function(context, locals) {
             var res = StringMapWrapper.create();
             for (var i = 0; i < this.keys.length; ++i) {
-              StringMapWrapper.set(res, this.keys[i], this.values[i].eval(context));
+              StringMapWrapper.set(res, this.keys[i], this.values[i].eval(context, locals));
             }
             return res;
           },
@@ -300,7 +296,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.expressions = expressions;
         };
         return ($traceurRuntime.createClass)(Interpolation, {
-          eval: function(context) {
+          eval: function(context, locals) {
             throw new BaseException("evaluating an Interpolation is not supported");
           },
           visit: function(visitor) {
@@ -320,15 +316,15 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.right = right;
         };
         return ($traceurRuntime.createClass)(Binary, {
-          eval: function(context) {
-            var left = this.left.eval(context);
+          eval: function(context, locals) {
+            var left = this.left.eval(context, locals);
             switch (this.operation) {
               case '&&':
-                return left && this.right.eval(context);
+                return left && this.right.eval(context, locals);
               case '||':
-                return left || this.right.eval(context);
+                return left || this.right.eval(context, locals);
             }
-            var right = this.right.eval(context);
+            var right = this.right.eval(context, locals);
             switch (this.operation) {
               case '+':
                 return left + right;
@@ -374,8 +370,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.expression = expression;
         };
         return ($traceurRuntime.createClass)(PrefixNot, {
-          eval: function(context) {
-            return !this.expression.eval(context);
+          eval: function(context, locals) {
+            return !this.expression.eval(context, locals);
           },
           visit: function(visitor) {
             return visitor.visitPrefixNot(this);
@@ -393,8 +389,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.value = value;
         };
         return ($traceurRuntime.createClass)(Assignment, {
-          eval: function(context) {
-            return this.target.assign(context, this.value.eval(context));
+          eval: function(context, locals) {
+            return this.target.assign(context, locals, this.value.eval(context, locals));
           },
           visit: function(visitor) {
             return visitor.visitAssignment(this);
@@ -414,17 +410,15 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.name = name;
         };
         return ($traceurRuntime.createClass)(MethodCall, {
-          eval: function(context) {
-            var evaluatedContext = this.receiver.eval(context);
-            var evaluatedArgs = evalList(context, this.args);
-            while (evaluatedContext instanceof ContextWithVariableBindings) {
-              if (evaluatedContext.hasBinding(this.name)) {
-                var fn = evaluatedContext.get(this.name);
-                return FunctionWrapper.apply(fn, evaluatedArgs);
-              }
-              evaluatedContext = evaluatedContext.parent;
+          eval: function(context, locals) {
+            var evaluatedArgs = evalList(context, locals, this.args);
+            if (this.receiver instanceof ImplicitReceiver && isPresent(locals) && locals.contains(this.name)) {
+              var fn = locals.get(this.name);
+              return FunctionWrapper.apply(fn, evaluatedArgs);
+            } else {
+              var evaluatedReceiver = this.receiver.eval(context, locals);
+              return this.fn(evaluatedReceiver, evaluatedArgs);
             }
-            return this.fn(evaluatedContext, evaluatedArgs);
           },
           visit: function(visitor) {
             return visitor.visitMethodCall(this);
@@ -442,12 +436,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.args = args;
         };
         return ($traceurRuntime.createClass)(FunctionCall, {
-          eval: function(context) {
-            var obj = this.target.eval(context);
+          eval: function(context, locals) {
+            var obj = this.target.eval(context, locals);
             if (!(obj instanceof Function)) {
               throw new BaseException((obj + " is not a function"));
             }
-            return FunctionWrapper.apply(obj, evalList(context, this.args));
+            return FunctionWrapper.apply(obj, evalList(context, locals, this.args));
           },
           visit: function(visitor) {
             return visitor.visitFunctionCall(this);
@@ -466,14 +460,14 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.ast = ast;
         };
         return ($traceurRuntime.createClass)(ASTWithSource, {
-          eval: function(context) {
-            return this.ast.eval(context);
+          eval: function(context, locals) {
+            return this.ast.eval(context, locals);
           },
           get isAssignable() {
             return this.ast.isAssignable;
           },
-          assign: function(context, value) {
-            return this.ast.assign(context, value);
+          assign: function(context, locals, value) {
+            return this.ast.assign(context, locals, value);
           },
           visit: function(visitor) {
             return this.ast.visit(visitor);
@@ -589,9 +583,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       Object.defineProperty(AstVisitor.prototype.visitPrefixNot, "parameters", {get: function() {
           return [[PrefixNot]];
         }});
-      _evalListCache = [[], [0], [0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0, 0]];
+      _evalListCache = [[], [0], [0, 0], [0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0]];
       Object.defineProperty(evalList, "parameters", {get: function() {
-          return [[], [List]];
+          return [[], [], [List]];
         }});
     }
   };

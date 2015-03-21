@@ -29,8 +29,8 @@ System.register(["angular2/test_lib", "angular2/src/core/compiler/view", "angula
       SomeDirective;
   function createView(nodes) {
     var view = new View(null, nodes, MapWrapper.create());
-    var cd = new DynamicProtoChangeDetector(null).instantiate(view, []);
-    view.init(cd, [], [], [], [], [], [], []);
+    var cd = new DynamicProtoChangeDetector(null).instantiate(view, [], null);
+    view.init(cd, [], [], [], [], [], [], [], [], []);
     return view;
   }
   function main() {
@@ -70,7 +70,7 @@ System.register(["angular2/test_lib", "angular2/src/core/compiler/view", "angula
           return out;
         }
         beforeEach((function() {
-          viewContainer.hydrate(new Injector([]), null);
+          viewContainer.hydrate(new Injector([]), null, null);
           var fillerView = createView([el('<filler>filler</filler>')]);
           viewContainer.insert(fillerView);
         }));
@@ -161,9 +161,9 @@ System.register(["angular2/test_lib", "angular2/src/core/compiler/view", "angula
         var fancyView;
         beforeEach((function() {
           var parser = new Parser(new Lexer());
-          viewContainer.hydrate(new Injector([]), null);
+          viewContainer.hydrate(new Injector([]), null, null);
           var pv = new ProtoView(el('<div class="ng-binding">{{}}</div>'), new DynamicProtoChangeDetector(null), new NativeShadowDomStrategy(null));
-          pv.bindElement(new ProtoElementInjector(null, 1, [SomeDirective]));
+          pv.bindElement(null, 0, new ProtoElementInjector(null, 1, [SomeDirective]));
           pv.bindTextNode(0, parser.parseBinding('foo', null));
           fancyView = pv.instantiate(null, null);
         }));
@@ -249,7 +249,7 @@ System.register(["angular2/test_lib", "angular2/src/core/compiler/view", "angula
           hydrated: function() {
             return this.isHydrated;
           },
-          hydrate: function(_, __, ___) {
+          hydrate: function(_, __, ___, ____, _____) {
             this.isHydrated = true;
           },
           dehydrate: function() {

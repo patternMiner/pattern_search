@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/core", "angular2/di", "angular2/src/dom/dom_adapter", "angular2/src/facade/lang", "angular2/src/facade/collection", "./model", "./validators"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/angular2", "angular2/di", "angular2/src/dom/dom_adapter", "angular2/src/facade/lang", "angular2/src/facade/collection", "./model", "./validators"], function($__export) {
   "use strict";
   var assert,
       Template,
@@ -121,6 +121,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/core", "angular2/di", "ang
           assert.argumentTypes(groupDirective, ControlGroupDirective, el, NgElement);
           this._groupDirective = groupDirective;
           this._el = el;
+          this.controlName = null;
+          this.type = null;
           this.validator = validators.nullValidator;
         };
         return ($traceurRuntime.createClass)(ControlDirective, {

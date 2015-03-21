@@ -289,7 +289,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
           },
           isCommentNode: function(node) {
             assert.argumentTypes(node, Node);
-            return assert.returnType((node.nodeType === Node.TEXT_NODE), assert.type.boolean);
+            return assert.returnType((node.nodeType === Node.COMMENT_NODE), assert.type.boolean);
           },
           isElementNode: function(node) {
             assert.argumentTypes(node, Node);

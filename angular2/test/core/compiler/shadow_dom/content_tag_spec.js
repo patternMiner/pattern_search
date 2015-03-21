@@ -1,4 +1,4 @@
-System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/dom/dom_adapter", "angular2/src/core/compiler/shadow_dom_emulation/content_tag", "angular2/src/core/dom/element", "angular2/src/core/compiler/shadow_dom_emulation/light_dom"], function($__export) {
+System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/dom/dom_adapter", "angular2/src/core/compiler/shadow_dom_emulation/content_tag", "angular2/src/core/compiler/shadow_dom_emulation/light_dom"], function($__export) {
   "use strict";
   var describe,
       beforeEach,
@@ -12,34 +12,34 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       IMPLEMENTS,
       DOM,
       Content,
-      NgElement,
       LightDom,
       DummyLightDom,
-      _script;
+      _scriptStart,
+      _scriptEnd;
   function main() {
     describe('Content', function() {
+      var parent;
+      var content;
+      beforeEach((function() {
+        parent = el(("<div>" + _scriptStart + _scriptEnd));
+        content = DOM.firstChild(parent);
+      }));
       it("should insert the nodes", (function() {
-        var parent = el("<div><content></content></div>");
-        var content = DOM.firstChild(parent);
-        var c = new Content(null, new NgElement(content));
+        var c = new Content(null, content, '');
         c.insert([el("<a></a>"), el("<b></b>")]);
-        expect(DOM.getInnerHTML(parent)).toEqual((_script + "<a></a><b></b>" + _script));
+        expect(DOM.getInnerHTML(parent)).toEqual((_scriptStart + "<a></a><b></b>" + _scriptEnd));
       }));
       it("should remove the nodes from the previous insertion", (function() {
-        var parent = el("<div><content></content></div>");
-        var content = DOM.firstChild(parent);
-        var c = new Content(null, new NgElement(content));
+        var c = new Content(null, content, '');
         c.insert([el("<a></a>")]);
         c.insert([el("<b></b>")]);
-        expect(DOM.getInnerHTML(parent)).toEqual((_script + "<b></b>" + _script));
+        expect(DOM.getInnerHTML(parent)).toEqual((_scriptStart + "<b></b>" + _scriptEnd));
       }));
       it("should insert empty list", (function() {
-        var parent = el("<div><content></content></div>");
-        var content = DOM.firstChild(parent);
-        var c = new Content(null, new NgElement(content));
+        var c = new Content(null, content, '');
         c.insert([el("<a></a>")]);
         c.insert([]);
-        expect(DOM.getInnerHTML(parent)).toEqual(("" + _script + _script));
+        expect(DOM.getInnerHTML(parent)).toEqual(("" + _scriptStart + _scriptEnd));
       }));
     });
   }
@@ -62,8 +62,6 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
     }, function($__m) {
       Content = $__m.Content;
     }, function($__m) {
-      NgElement = $__m.NgElement;
-    }, function($__m) {
       LightDom = $__m.LightDom;
     }],
     execute: function() {
@@ -78,7 +76,8 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       Object.defineProperty(DummyLightDom, "annotations", {get: function() {
           return [new proxy, new IMPLEMENTS(LightDom)];
         }});
-      _script = "<script type=\"ng/content\"></script>";
+      _scriptStart = "<script start=\"\"></script>";
+      _scriptEnd = "<script end=\"\"></script>";
     }
   };
 });

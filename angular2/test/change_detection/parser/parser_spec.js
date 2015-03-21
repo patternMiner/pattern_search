@@ -1,4 +1,4 @@
-System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/reflection/reflection", "angular2/src/facade/collection", "angular2/src/change_detection/parser/parser", "angular2/src/change_detection/parser/lexer", "angular2/src/change_detection/parser/context_with_variable_bindings", "angular2/src/change_detection/parser/ast"], function($__export) {
+System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/reflection/reflection", "angular2/src/facade/collection", "angular2/src/change_detection/parser/parser", "angular2/src/change_detection/parser/lexer", "angular2/src/change_detection/parser/locals", "angular2/src/change_detection/parser/ast"], function($__export) {
   "use strict";
   var ddescribe,
       describe,
@@ -15,7 +15,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       ListWrapper,
       Parser,
       Lexer,
-      ContextWithVariableBindings,
+      Locals,
       Pipe,
       LiteralPrimitive,
       TestData;
@@ -48,16 +48,23 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
     function addPipes(ast, pipes) {
       return createParser().addPipes(ast, pipes);
     }
+    function emptyLocals() {
+      return new Locals(null, MapWrapper.create());
+    }
     function expectEval(text) {
       var passedInContext = arguments[1] !== (void 0) ? arguments[1] : null;
+      var passedInLocals = arguments[2] !== (void 0) ? arguments[2] : null;
       var c = isBlank(passedInContext) ? td() : passedInContext;
-      return expect(parseAction(text).eval(c));
+      var l = isBlank(passedInLocals) ? emptyLocals() : passedInLocals;
+      return expect(parseAction(text).eval(c, l));
     }
     function expectEvalError(text) {
       var passedInContext = arguments[1] !== (void 0) ? arguments[1] : null;
+      var passedInLocals = arguments[2] !== (void 0) ? arguments[2] : null;
       var c = isBlank(passedInContext) ? td() : passedInContext;
+      var l = isBlank(passedInLocals) ? emptyLocals() : passedInLocals;
       return expect((function() {
-        return parseAction(text).eval(c);
+        return parseAction(text).eval(c, l);
       }));
     }
     function evalAsts(asts) {
@@ -65,7 +72,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       var c = isBlank(passedInContext) ? td() : passedInContext;
       var res = [];
       for (var i = 0; i < asts.length; i++) {
-        ListWrapper.push(res, asts[i].eval(c));
+        ListWrapper.push(res, asts[i].eval(c, emptyLocals()));
       }
       return res;
     }
@@ -166,18 +173,18 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
             expectEvalError('x. 1234').toThrowError(new RegExp('identifier or keyword'));
             expectEvalError('x."foo"').toThrowError(new RegExp('identifier or keyword'));
           }));
-          it("should read a field from ContextWithVariableBindings", (function() {
-            var locals = new ContextWithVariableBindings(null, MapWrapper.createFromPairs([["key", "value"]]));
-            expectEval("key", locals).toEqual("value");
+          it("should read a field from Locals", (function() {
+            var locals = new Locals(null, MapWrapper.createFromPairs([["key", "value"]]));
+            expectEval("key", null, locals).toEqual("value");
           }));
-          it("should handle nested ContextWithVariableBindings", (function() {
-            var nested = new ContextWithVariableBindings(null, MapWrapper.createFromPairs([["key", "value"]]));
-            var locals = new ContextWithVariableBindings(nested, MapWrapper.create());
-            expectEval("key", locals).toEqual("value");
+          it("should handle nested Locals", (function() {
+            var nested = new Locals(null, MapWrapper.createFromPairs([["key", "value"]]));
+            var locals = new Locals(nested, MapWrapper.create());
+            expectEval("key", null, locals).toEqual("value");
           }));
-          it("should fall back to a regular field read when ContextWithVariableBindings " + "does not have the requested field", (function() {
-            var locals = new ContextWithVariableBindings(td(999), MapWrapper.create());
-            expectEval("a", locals).toEqual(999);
+          it("should fall back to a regular field read when Locals " + "does not have the requested field", (function() {
+            var locals = new Locals(null, MapWrapper.create());
+            expectEval("a", td(999), locals).toEqual(999);
           }));
         }));
         describe("method calls", (function() {
@@ -187,18 +194,21 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
             expectEval("a.add(1,2)", td(td())).toEqual(3);
             expectEval("fn().add(1,2)", td(0, 0, td())).toEqual(3);
           }));
+          it('should throw when more than 10 arguments', (function() {
+            expectEvalError("fn(1,2,3,4,5,6,7,8,9,10,11)").toThrowError(new RegExp('more than'));
+          }));
           it('should throw when no method', (function() {
             expectEvalError("blah()").toThrowError();
           }));
-          it('should evaluate a method from ContextWithVariableBindings', (function() {
-            var context = new ContextWithVariableBindings(td(0, 0, 'parent'), MapWrapper.createFromPairs([['fn', (function() {
+          it('should evaluate a method from Locals', (function() {
+            var locals = new Locals(null, MapWrapper.createFromPairs([['fn', (function() {
               return 'child';
             })]]));
-            expectEval("fn()", context).toEqual('child');
+            expectEval("fn()", td(0, 0, 'parent'), locals).toEqual('child');
           }));
-          it('should fall back to the parent context when ContextWithVariableBindings does not ' + 'have the requested method', (function() {
-            var context = new ContextWithVariableBindings(td(0, 0, 'parent'), MapWrapper.create());
-            expectEval("fn()", context).toEqual('parent');
+          it('should fall back to the parent context when Locals does not ' + 'have the requested method', (function() {
+            var locals = new Locals(null, MapWrapper.create());
+            expectEval("fn()", td(0, 0, 'parent'), locals).toEqual('parent');
           }));
         }));
         describe("functional calls", (function() {
@@ -269,13 +279,13 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
           }));
           it('should reassign when no variable binding with the given name', (function() {
             var context = td();
-            var locals = new ContextWithVariableBindings(context, MapWrapper.create());
-            expectEval('a = 200', locals).toEqual(200);
+            var locals = new Locals(null, MapWrapper.create());
+            expectEval('a = 200', context, locals).toEqual(200);
             expect(context.a).toEqual(200);
           }));
           it('should throw when reassigning a variable binding', (function() {
-            var locals = new ContextWithVariableBindings(null, MapWrapper.createFromPairs([["key", "value"]]));
-            expectEvalError('key = 200', locals).toThrowError(new RegExp("Cannot reassign a variable binding"));
+            var locals = new Locals(null, MapWrapper.createFromPairs([["key", "value"]]));
+            expectEvalError('key = 200', null, locals).toThrowError(new RegExp("Cannot reassign a variable binding"));
           }));
         }));
         describe("general error handling", (function() {
@@ -296,7 +306,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
           expect((function() {
             parseAction('a()').eval(td((function() {
               throw new BaseException("boo to you");
-            })));
+            })), emptyLocals());
           })).toThrowError('boo to you');
         }));
         describe("multiple statements", (function() {
@@ -497,7 +507,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       }));
       describe('wrapLiteralPrimitive', (function() {
         it('should wrap a literal primitive', (function() {
-          expect(createParser().wrapLiteralPrimitive("foo", null).eval(null)).toEqual("foo");
+          expect(createParser().wrapLiteralPrimitive("foo", null).eval(null, emptyLocals())).toEqual("foo");
         }));
       }));
     }));
@@ -526,7 +536,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
     }, function($__m) {
       Lexer = $__m.Lexer;
     }, function($__m) {
-      ContextWithVariableBindings = $__m.ContextWithVariableBindings;
+      Locals = $__m.Locals;
     }, function($__m) {
       Pipe = $__m.Pipe;
       LiteralPrimitive = $__m.LiteralPrimitive;

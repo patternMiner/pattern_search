@@ -46,7 +46,7 @@ System.register(["angular2/test_lib", "angular2/src/dom/dom_adapter", "angular2/
       function createView(pv) {
         component = new TestComponent();
         view = pv.instantiate(null, null);
-        view.hydrate(new Injector([]), null, component);
+        view.hydrate(new Injector([]), null, null, component, null);
         cd = view.changeDetector;
       }
       function compileWithTemplate(html) {

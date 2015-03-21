@@ -16,9 +16,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
       Decorator,
       Component,
       Viewport,
+      DynamicComponent,
       ElementBinder,
       ProtoElementInjector,
-      ProtoView,
+      viewModule,
       dashCaseToCamelCase,
       AST,
       CompileElement;
@@ -70,12 +71,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
       Decorator = $__m.Decorator;
       Component = $__m.Component;
       Viewport = $__m.Viewport;
+      DynamicComponent = $__m.DynamicComponent;
     }, function($__m) {
       ElementBinder = $__m.ElementBinder;
     }, function($__m) {
       ProtoElementInjector = $__m.ProtoElementInjector;
     }, function($__m) {
-      ProtoView = $__m.ProtoView;
+      viewModule = $__m;
     }, function($__m) {
       dashCaseToCamelCase = $__m.dashCaseToCamelCase;
     }, function($__m) {
@@ -95,6 +97,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
           this.decoratorDirectives = null;
           this.viewportDirective = null;
           this.componentDirective = null;
+          this.hasNestedView = false;
           this._allDirectives = null;
           this.isViewRoot = false;
           this.hasBindings = false;
@@ -102,8 +105,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
           this.inheritedProtoElementInjector = null;
           this.inheritedElementBinder = null;
           this.distanceToParentInjector = 0;
+          this.distanceToParentBinder = 0;
           this.compileChildren = true;
           this.ignoreBindings = false;
+          this.contentTagSelector = null;
           var tplDesc = assertionsEnabled() ? getElementDescription(element) : null;
           if (compilationUnit !== '') {
             this.elementDescription = compilationUnit;
@@ -155,7 +160,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
             if (isBlank(this.variableBindings)) {
               this.variableBindings = MapWrapper.create();
             }
-            MapWrapper.set(this.variableBindings, variableValue, variableName);
+            MapWrapper.set(this.variableBindings, variableValue, dashCaseToCamelCase(variableName));
           },
           addEventBinding: function(eventName, expression) {
             assert.argumentTypes(eventName, assert.type.string, expression, AST);
@@ -179,6 +184,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "a
             } else if (annotation instanceof Viewport) {
               this.viewportDirective = directive;
             } else if (annotation instanceof Component) {
+              this.componentDirective = directive;
+              this.hasNestedView = true;
+            } else if (annotation instanceof DynamicComponent) {
               this.componentDirective = directive;
             }
           },

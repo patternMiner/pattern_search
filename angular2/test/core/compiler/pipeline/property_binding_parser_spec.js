@@ -33,9 +33,16 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/c
         var results = createPipeline().process(el('<div [a]="b"></div>'));
         expect(MapWrapper.get(results[0].propertyBindings, 'a').source).toEqual('b');
       }));
+      it('should detect [] syntax only if an attribute name starts and ends with []', (function() {
+        expect(createPipeline().process(el('<div z[a]="b"></div>'))[0].propertyBindings).toBe(null);
+        expect(createPipeline().process(el('<div [a]v="b"></div>'))[0].propertyBindings).toBe(null);
+      }));
       it('should detect bind- syntax', (function() {
         var results = createPipeline().process(el('<div bind-a="b"></div>'));
         expect(MapWrapper.get(results[0].propertyBindings, 'a').source).toEqual('b');
+      }));
+      it('should detect bind- syntax only if an attribute name starts with bind', (function() {
+        expect(createPipeline().process(el('<div _bind-a="b"></div>'))[0].propertyBindings).toBe(null);
       }));
       it('should detect interpolation syntax', (function() {
         var results = createPipeline().process(el('<div a="{{b}}"></div>'));
@@ -61,15 +68,31 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/c
         var results = createPipeline().process(el('<p #george></p>'));
         expect(MapWrapper.get(results[0].variableBindings, '\$implicit')).toEqual('george');
       }));
+      it('should detect variable bindings only if an attribute name starts with #', (function() {
+        var results = createPipeline().process(el('<p b#george></p>'));
+        expect(results[0].variableBindings).toBe(null);
+      }));
       it('should detect () syntax', (function() {
         var results = createPipeline().process(el('<div (click)="b()"></div>'));
         expect(MapWrapper.get(results[0].eventBindings, 'click').source).toEqual('b()');
         results = createPipeline().process(el('<div (click[])="b()"></div>'));
         expect(MapWrapper.get(results[0].eventBindings, 'click[]').source).toEqual('b()');
       }));
+      it('should detect () syntax only if an attribute name starts and ends with ()', (function() {
+        expect(createPipeline().process(el('<div z(a)="b()"></div>'))[0].propertyBindings).toBe(null);
+        expect(createPipeline().process(el('<div (a)v="b()"></div>'))[0].propertyBindings).toBe(null);
+      }));
+      it('should parse event handlers using () syntax as actions', (function() {
+        var results = createPipeline().process(el('<div (click)="foo=bar"></div>'));
+        expect(MapWrapper.get(results[0].eventBindings, 'click').source).toEqual('foo=bar');
+      }));
       it('should detect on- syntax', (function() {
         var results = createPipeline().process(el('<div on-click="b()"></div>'));
         expect(MapWrapper.get(results[0].eventBindings, 'click').source).toEqual('b()');
+      }));
+      it('should parse event handlers using on- syntax as actions', (function() {
+        var results = createPipeline().process(el('<div on-click="foo=bar"></div>'));
+        expect(MapWrapper.get(results[0].eventBindings, 'click').source).toEqual('foo=bar');
       }));
     }));
   }

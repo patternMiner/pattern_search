@@ -31,7 +31,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           if (isPresent(DOM.getAttribute(current.element, 'var-binding'))) {
             current.variableBindings = MapWrapper.createFromStringMap(variableBindings);
           }
-          current.inheritedElementBinder = new ElementBinder(null, null, null);
+          current.inheritedElementBinder = new ElementBinder(0, null, 0, null, null, null);
         })), new ProtoViewBuilder(dynamicChangeDetection, new NativeShadowDomStrategy(null))]);
       }
       it('should not create a ProtoView when the isViewRoot flag is not set', (function() {
@@ -54,6 +54,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
         var results = createPipeline().process(element);
         expect(results[1].inheritedElementBinder.nestedProtoView).toBe(results[2].inheritedProtoView);
       }));
+      it('should set the parent proto view', (function() {
+        var element = el('<div viewroot><template><a viewroot></a></template></div>');
+        var results = createPipeline().process(element);
+        var parentProtoView = results[1].inheritedProtoView;
+        var nestedProtoView = results[2].inheritedProtoView;
+        expect(nestedProtoView.parentProtoView).toBe(parentProtoView);
+      }));
       it('should bind variables to the nested ProtoView', (function() {
         var element = el('<div viewroot><template var-binding><a viewroot></a></template></div>');
         var results = createPipeline({
@@ -73,7 +80,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           'var2': 'map2'
         }).process(element);
         var protoView = results[0].inheritedProtoView;
-        expect(protoView.protoContextLocals).toEqual(MapWrapper.createFromStringMap({
+        expect(protoView.protoLocals).toEqual(MapWrapper.createFromStringMap({
           'map2': null,
           'map1': null
         }));

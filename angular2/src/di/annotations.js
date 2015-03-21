@@ -5,7 +5,8 @@ System.register(["angular2/src/facade/lang"], function($__export) {
       InjectPromise,
       InjectLazy,
       Optional,
-      DependencyAnnotation;
+      DependencyAnnotation,
+      Injectable;
   return {
     setters: [function($__m) {
       CONST = $__m.CONST;
@@ -50,6 +51,13 @@ System.register(["angular2/src/facade/lang"], function($__export) {
         return ($traceurRuntime.createClass)(DependencyAnnotation, {}, {});
       }()));
       Object.defineProperty(DependencyAnnotation, "annotations", {get: function() {
+          return [new CONST()];
+        }});
+      Injectable = $__export("Injectable", (function() {
+        var Injectable = function Injectable() {};
+        return ($traceurRuntime.createClass)(Injectable, {}, {});
+      }()));
+      Object.defineProperty(Injectable, "annotations", {get: function() {
           return [new CONST()];
         }});
     }

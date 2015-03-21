@@ -2,7 +2,7 @@ System.register(["rtts_assert/rtts_assert", "./compile_element", "./compile_cont
   "use strict";
   var assert,
       CompileElement,
-      CompileControl,
+      ccModule,
       CompileStep;
   return {
     setters: [function($__m) {
@@ -10,17 +10,17 @@ System.register(["rtts_assert/rtts_assert", "./compile_element", "./compile_cont
     }, function($__m) {
       CompileElement = $__m.CompileElement;
     }, function($__m) {
-      CompileControl = $__m.CompileControl;
+      ccModule = $__m;
     }],
     execute: function() {
       CompileStep = $__export("CompileStep", (function() {
         var CompileStep = function CompileStep() {};
         return ($traceurRuntime.createClass)(CompileStep, {process: function(parent, current, control) {
-            assert.argumentTypes(parent, CompileElement, current, CompileElement, control, CompileControl);
+            assert.argumentTypes(parent, CompileElement, current, CompileElement, control, ccModule.CompileControl);
           }}, {});
       }()));
       Object.defineProperty(CompileStep.prototype.process, "parameters", {get: function() {
-          return [[CompileElement], [CompileElement], [CompileControl]];
+          return [[CompileElement], [CompileElement], [ccModule.CompileControl]];
         }});
     }
   };

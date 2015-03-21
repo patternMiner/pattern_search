@@ -17,9 +17,9 @@ import {Chip} from 'pattern_search/components/common/list_builder/chip';
 })
 export class ListBuilder {
   _itemList: List;
-  labelProvider: Function;
-  itemAddedListener: Function;
-  itemDeletedListener: Function;
+  labelProvider;
+  itemAddedListener;
+  itemDeletedListener;
 
   constructor() {
     this.labelProvider = (item) => item;
@@ -30,15 +30,15 @@ export class ListBuilder {
 
   addItem(item) {
     ListWrapper.push(this._itemList, item);
-    if (itemAddedListener != null) {
-      itemAddedListener(item);
+    if (this.itemAddedListener != null) {
+      this.itemAddedListener(item);
     }
   }
 
   deleteItem(item) {
     ListWrapper.remove(this._itemList, item);
-    if (itemDeletedListener != null) {
-      itemDeletedListener(item);
+    if (this.itemDeletedListener != null) {
+      this.itemDeletedListener(item);
     }
   }
 }

@@ -36,7 +36,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       CompileControl = $__m.CompileControl;
     }],
     execute: function() {
-      BIND_NAME_REGEXP = RegExpWrapper.create('^(?:(?:(bind)|(var)|(on))-(.+))|\\[([^\\]]+)\\]|\\(([^\\)]+)\\)|(#)(.+)');
+      BIND_NAME_REGEXP = RegExpWrapper.create('^(?:(?:(?:(bind)|(var)|(on))-(.+))|\\[([^\\]]+)\\]|\\(([^\\)]+)\\)|(#)(.+))$');
       PropertyBindingParser = $__export("PropertyBindingParser", (function($__super) {
         var PropertyBindingParser = function PropertyBindingParser(parser) {
           assert.argumentTypes(parser, Parser);
@@ -70,7 +70,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
                   current.addPropertyBinding(bindParts[5], $__0._parseBinding(attrValue, desc));
                   MapWrapper.set(newAttrs, bindParts[5], attrValue);
                 } else if (isPresent(bindParts[6])) {
-                  current.addEventBinding(bindParts[6], $__0._parseBinding(attrValue, desc));
+                  current.addEventBinding(bindParts[6], $__0._parseAction(attrValue, desc));
                 }
               } else {
                 var ast = $__0._parseInterpolation(attrValue, desc);

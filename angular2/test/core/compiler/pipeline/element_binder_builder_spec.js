@@ -112,7 +112,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       function instantiateView(protoView) {
         evalContext = new Context();
         view = protoView.instantiate(null, null);
-        view.hydrate(new Injector([]), null, evalContext);
+        view.hydrate(new Injector([]), null, null, evalContext, null);
         changeDetector = view.changeDetector;
       }
       it('should not create an ElementBinder for elements that have no bindings', (function() {
@@ -333,7 +333,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
         var pv = results[0].inheritedProtoView;
         var eventMap = StringMapWrapper.get(pv.elementBinders[0].events, 'event1');
         var ast = MapWrapper.get(eventMap, -1);
-        expect(ast.eval(null)).toBe(2);
+        expect(ast.eval(null, null)).toBe(2);
       }));
       it('should bind directive events', (function() {
         var directives = [SomeDecoratorWithEvent];
@@ -348,7 +348,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
         var eventMap = StringMapWrapper.get(directiveEvents, 'event');
         var ast = MapWrapper.get(eventMap, 0);
         var context = new SomeDecoratorWithEvent();
-        expect(ast.eval(context)).toEqual('onEvent() callback');
+        expect(ast.eval(context, null)).toEqual('onEvent() callback');
       }));
       it('should bind directive properties', (function() {
         var propertyBindings = MapWrapper.createFromStringMap({

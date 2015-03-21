@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./abstract_change_detector", "./pipes/pipe_registry", "./change_detection_util", "./proto_record", "./exceptions"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./abstract_change_detector", "./pipes/pipe_registry", "./change_detection_util", "./proto_record", "./exceptions"], function($__export) {
   "use strict";
   var assert,
       isPresent,
@@ -9,7 +9,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ListWrapper,
       MapWrapper,
       StringMapWrapper,
-      ContextWithVariableBindings,
       AbstractChangeDetector,
       PipeRegistry,
       ChangeDetectionUtil,
@@ -18,6 +17,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ProtoRecord,
       RECORD_TYPE_SELF,
       RECORD_TYPE_PROPERTY,
+      RECORD_TYPE_LOCAL,
       RECORD_TYPE_INVOKE_METHOD,
       RECORD_TYPE_CONST,
       RECORD_TYPE_INVOKE_CLOSURE,
@@ -52,8 +52,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       MapWrapper = $__m.MapWrapper;
       StringMapWrapper = $__m.StringMapWrapper;
     }, function($__m) {
-      ContextWithVariableBindings = $__m.ContextWithVariableBindings;
-    }, function($__m) {
       AbstractChangeDetector = $__m.AbstractChangeDetector;
     }, function($__m) {
       PipeRegistry = $__m.PipeRegistry;
@@ -65,6 +63,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ProtoRecord = $__m.ProtoRecord;
       RECORD_TYPE_SELF = $__m.RECORD_TYPE_SELF;
       RECORD_TYPE_PROPERTY = $__m.RECORD_TYPE_PROPERTY;
+      RECORD_TYPE_LOCAL = $__m.RECORD_TYPE_LOCAL;
       RECORD_TYPE_INVOKE_METHOD = $__m.RECORD_TYPE_INVOKE_METHOD;
       RECORD_TYPE_CONST = $__m.RECORD_TYPE_CONST;
       RECORD_TYPE_INVOKE_CLOSURE = $__m.RECORD_TYPE_INVOKE_CLOSURE;
@@ -91,12 +90,14 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           ListWrapper.fill(this.pipes, null);
           ListWrapper.fill(this.prevContexts, uninitialized);
           ListWrapper.fill(this.changes, false);
+          this.locals = null;
           this.protos = protoRecords;
         };
         return ($traceurRuntime.createClass)(DynamicChangeDetector, {
-          hydrate: function(context) {
-            assert.argumentTypes(context, assert.type.any);
+          hydrate: function(context, locals) {
+            assert.argumentTypes(context, assert.type.any, locals, assert.type.any);
             this.values[0] = context;
+            this.locals = locals;
           },
           dehydrate: function() {
             this._destroyPipes();
@@ -104,6 +105,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             ListWrapper.fill(this.changes, false);
             ListWrapper.fill(this.pipes, null);
             ListWrapper.fill(this.prevContexts, uninitialized);
+            this.locals = null;
           },
           _destroyPipes: function() {
             for (var i = 0; i < this.pipes.length; ++i) {
@@ -176,25 +178,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
                 return proto.funcOrValue;
               case RECORD_TYPE_PROPERTY:
                 var context = this._readContext(proto);
-                var c = ChangeDetectionUtil.findContext(proto.name, context);
-                if (c instanceof ContextWithVariableBindings) {
-                  return c.get(proto.name);
-                } else {
-                  var propertyGetter = assert.type(proto.funcOrValue, Function);
-                  return propertyGetter(c);
-                }
-                break;
+                return proto.funcOrValue(context);
+              case RECORD_TYPE_LOCAL:
+                return this.locals.get(proto.name);
               case RECORD_TYPE_INVOKE_METHOD:
                 var context = this._readContext(proto);
                 var args = this._readArgs(proto);
-                var c = ChangeDetectionUtil.findContext(proto.name, context);
-                if (c instanceof ContextWithVariableBindings) {
-                  return FunctionWrapper.apply(c.get(proto.name), args);
-                } else {
-                  var methodInvoker = assert.type(proto.funcOrValue, Function);
-                  return methodInvoker(c, args);
-                }
-                break;
+                return proto.funcOrValue(context, args);
               case RECORD_TYPE_KEYED_ACCESS:
                 var arg = this._readArgs(proto)[0];
                 return this._readContext(proto)[arg];
@@ -292,7 +282,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           return [[assert.type.any], [PipeRegistry], [assert.genericType(List, ProtoRecord)]];
         }});
       Object.defineProperty(DynamicChangeDetector.prototype.hydrate, "parameters", {get: function() {
-          return [[assert.type.any]];
+          return [[assert.type.any], [assert.type.any]];
         }});
       Object.defineProperty(DynamicChangeDetector.prototype.detectChangesInRecords, "parameters", {get: function() {
           return [[assert.type.boolean]];

@@ -1,7 +1,8 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection", "./parser/locals"], function($__export) {
   "use strict";
   var assert,
       List,
+      Locals,
       ChangeRecord,
       CHECK_ONCE,
       CHECKED,
@@ -14,6 +15,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection"], f
       assert = $__m.assert;
     }, function($__m) {
       List = $__m.List;
+    }, function($__m) {
+      Locals = $__m.Locals;
     }],
     execute: function() {
       ChangeRecord = $__export("ChangeRecord", (function() {
@@ -53,8 +56,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection"], f
             assert.argumentTypes(cd, ChangeDetector);
           },
           remove: function() {},
-          hydrate: function(context) {
-            assert.argumentTypes(context, assert.type.any);
+          hydrate: function(context, locals) {
+            assert.argumentTypes(context, assert.type.any, locals, Locals);
           },
           dehydrate: function() {},
           markPathToRootAsCheckOnce: function() {},
@@ -69,7 +72,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/collection"], f
           return [[ChangeDetector]];
         }});
       Object.defineProperty(ChangeDetector.prototype.hydrate, "parameters", {get: function() {
-          return [[assert.type.any]];
+          return [[assert.type.any], [Locals]];
         }});
     }
   };

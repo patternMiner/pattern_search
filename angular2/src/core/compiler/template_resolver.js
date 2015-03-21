@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/core/annotations/template", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/reflection/reflection"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/core/annotations/template", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/reflection/reflection"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       Template,
       Type,
       stringify,
@@ -15,6 +16,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/core/annotations/templ
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       Template = $__m.Template;
     }, function($__m) {
@@ -58,6 +61,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/core/annotations/templ
           }
         }, {});
       }()));
+      Object.defineProperty(TemplateResolver, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(TemplateResolver.prototype.resolve, "parameters", {get: function() {
           return [[Type]];
         }});

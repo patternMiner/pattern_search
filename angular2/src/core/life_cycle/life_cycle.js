@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/change_detection", "angular2/src/core/zone/vm_turn_zone", "angular2/src/core/exception_handler", "angular2/src/facade/lang"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/change_detection", "angular2/src/core/zone/vm_turn_zone", "angular2/src/core/exception_handler", "angular2/src/facade/lang"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       ChangeDetector,
       VmTurnZone,
       ExceptionHandler,
@@ -9,6 +10,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/change_detection", "angula
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       ChangeDetector = $__m.ChangeDetector;
     }, function($__m) {
@@ -53,6 +56,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/change_detection", "angula
           }
         }, {});
       }()));
+      Object.defineProperty(LifeCycle, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(LifeCycle, "parameters", {get: function() {
           return [[ExceptionHandler], [ChangeDetector], [assert.type.boolean]];
         }});

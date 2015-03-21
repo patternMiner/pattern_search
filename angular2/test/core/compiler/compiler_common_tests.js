@@ -119,8 +119,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
             var compiler = createCompiler((function(parent, current, control) {
               if (DOM.hasClass(current.element, 'nested')) {
                 current.componentDirective = reader.read(NestedComponent);
+                current.hasNestedView = true;
                 current.inheritedProtoView = parent.inheritedProtoView;
-                current.inheritedElementBinder = current.inheritedProtoView.bindElement(null);
+                current.inheritedElementBinder = current.inheritedProtoView.bindElement(null, 0, null);
               } else {
                 current.inheritedProtoView = new ProtoView(current.element, null, null);
               }
@@ -151,7 +152,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
             var compiler = createCompiler((function(parent, current, control) {
               current.inheritedProtoView = new ProtoView(current.element, null, null);
               if (DOM.hasClass(current.element, 'nested')) {
-                current.inheritedElementBinder = current.inheritedProtoView.bindElement(null);
+                current.inheritedElementBinder = current.inheritedProtoView.bindElement(null, 0, null);
                 current.componentDirective = reader.read(NestedComponent);
                 ListWrapper.push(nestedElBinders, current.inheritedElementBinder);
               }
@@ -164,8 +165,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           })));
           it('should allow recursive components', inject([AsyncTestCompleter], (function(async) {
             var compiler = createCompiler((function(parent, current, control) {
+              current.hasNestedView = true;
               current.inheritedProtoView = new ProtoView(current.element, null, null);
-              current.inheritedElementBinder = current.inheritedProtoView.bindElement(null);
+              current.inheritedElementBinder = current.inheritedProtoView.bindElement(null, 0, null);
               current.componentDirective = reader.read(RecursiveComponent);
             }));
             compiler.compile(RecursiveComponent).then((function(protoView) {
@@ -193,9 +195,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/d
           it(("should load nested components " + name), inject([AsyncTestCompleter], (function(async) {
             var compiler = createCompiler((function(parent, current, control) {
               if (DOM.hasClass(current.element, 'parent')) {
+                current.hasNestedView = true;
                 current.componentDirective = reader.read(NestedComponent);
                 current.inheritedProtoView = parent.inheritedProtoView;
-                current.inheritedElementBinder = current.inheritedProtoView.bindElement(null);
+                current.inheritedElementBinder = current.inheritedProtoView.bindElement(null, 0, null);
               } else {
                 current.inheritedProtoView = new ProtoView(current.element, null, null);
               }

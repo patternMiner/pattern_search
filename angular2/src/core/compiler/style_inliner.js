@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/core/compiler/xhr/xhr", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/url_resolver", "angular2/src/facade/collection", "angular2/src/facade/lang", "angular2/src/facade/async"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/core/compiler/xhr/xhr", "angular2/src/core/compiler/style_url_resolver", "angular2/src/core/compiler/url_resolver", "angular2/src/facade/collection", "angular2/src/facade/lang", "angular2/src/facade/async"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       XHR,
       StyleUrlResolver,
       UrlResolver,
@@ -39,6 +40,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/core/compiler/xhr/xhr"
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       XHR = $__m.XHR;
     }, function($__m) {
@@ -125,6 +128,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/core/compiler/xhr/xhr"
           }
         }, {});
       }()));
+      Object.defineProperty(StyleInliner, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(StyleInliner, "parameters", {get: function() {
           return [[XHR], [StyleUrlResolver], [UrlResolver]];
         }});

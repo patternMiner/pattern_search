@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/math", "angular2/src/facade/collection", "angular2/di", "angular2/src/core/annotations/visibility", "angular2/src/core/annotations/di", "angular2/src/core/compiler/view", "angular2/src/core/compiler/shadow_dom_emulation/light_dom", "angular2/src/core/compiler/view_container", "angular2/src/core/dom/element", "angular2/src/core/annotations/annotations", "angular2/src/core/compiler/binding_propagation_config", "angular2/src/reflection/reflection"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/math", "angular2/src/facade/collection", "angular2/di", "angular2/src/core/annotations/visibility", "angular2/src/core/annotations/di", "angular2/src/core/compiler/view", "angular2/src/core/compiler/view_container", "angular2/src/core/dom/element", "angular2/src/core/annotations/annotations", "angular2/src/core/compiler/binding_propagation_config", "angular2/src/core/compiler/private_component_location", "angular2/src/reflection/reflection"], function($__export) {
   "use strict";
   var assert,
       isPresent,
@@ -23,14 +23,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       EventEmitter,
       PropertySetter,
       viewModule,
-      LightDom,
-      DestinationLightDom,
       ViewContainer,
       NgElement,
       Directive,
       onChange,
       onDestroy,
       BindingPropagationConfig,
+      pclModule,
       reflector,
       _MAX_DIRECTIVE_CONSTRUCTION_COUNTER,
       MAX_DEPTH,
@@ -77,9 +76,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
     }, function($__m) {
       viewModule = $__m;
     }, function($__m) {
-      LightDom = $__m.LightDom;
-      DestinationLightDom = $__m.DestinationLightDom;
-    }, function($__m) {
       ViewContainer = $__m.ViewContainer;
     }, function($__m) {
       NgElement = $__m.NgElement;
@@ -89,6 +85,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       onDestroy = $__m.onDestroy;
     }, function($__m) {
       BindingPropagationConfig = $__m.BindingPropagationConfig;
+    }, function($__m) {
+      pclModule = $__m;
     }, function($__m) {
       reflector = $__m.reflector;
     }],
@@ -101,9 +99,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.viewId = Key.get(viewModule.View).id;
           this.ngElementId = Key.get(NgElement).id;
           this.viewContainerId = Key.get(ViewContainer).id;
-          this.destinationLightDomId = Key.get(DestinationLightDom).id;
-          this.lightDomId = Key.get(LightDom).id;
           this.bindingPropagationConfigId = Key.get(BindingPropagationConfig).id;
+          this.privateComponentLocationId = Key.get(pclModule.PrivateComponentLocation).id;
         };
         return ($traceurRuntime.createClass)(StaticKeys, {}, {instance: function() {
             if (isBlank(_staticKeys))
@@ -166,41 +163,26 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           this.eventEmitterName = eventEmitterName;
           this.propSetterName = propSetterName;
         };
-        return ($traceurRuntime.createClass)(DirectiveDependency, {}, {
-          createFrom: function(d) {
+        return ($traceurRuntime.createClass)(DirectiveDependency, {}, {createFrom: function(d) {
             assert.argumentTypes(d, Dependency);
-            return assert.returnType((new DirectiveDependency(d.key, d.asPromise, d.lazy, d.optional, d.properties, DirectiveDependency._depth(d.properties), DirectiveDependency._eventEmitterName(d.properties), DirectiveDependency._propSetterName(d.properties))), Dependency);
-          },
-          _depth: function(properties) {
-            if (properties.length == 0)
-              return assert.returnType((0), int);
-            if (ListWrapper.any(properties, (function(p) {
-              return p instanceof Parent;
-            })))
-              return assert.returnType((1), int);
-            if (ListWrapper.any(properties, (function(p) {
-              return p instanceof Ancestor;
-            })))
-              return assert.returnType((MAX_DEPTH), int);
-            return assert.returnType((0), int);
-          },
-          _eventEmitterName: function(properties) {
+            var depth = 0;
+            var eventName = null;
+            var propName = null;
+            var properties = d.properties;
             for (var i = 0; i < properties.length; i++) {
-              if (properties[i] instanceof EventEmitter) {
-                return assert.returnType((properties[i].eventName), assert.type.string);
+              var property = properties[i];
+              if (property instanceof Parent) {
+                depth = 1;
+              } else if (property instanceof Ancestor) {
+                depth = MAX_DEPTH;
+              } else if (property instanceof EventEmitter) {
+                eventName = property.eventName;
+              } else if (property instanceof PropertySetter) {
+                propName = property.propName;
               }
             }
-            return assert.returnType((null), assert.type.string);
-          },
-          _propSetterName: function(properties) {
-            for (var i = 0; i < properties.length; i++) {
-              if (properties[i] instanceof PropertySetter) {
-                return assert.returnType((properties[i].propName), assert.type.string);
-              }
-            }
-            return assert.returnType((null), assert.type.string);
-          }
-        }, $__super);
+            return assert.returnType((new DirectiveDependency(d.key, d.asPromise, d.lazy, d.optional, d.properties, depth, eventName, propName)), Dependency);
+          }}, $__super);
       }(Dependency)));
       Object.defineProperty(DirectiveDependency, "parameters", {get: function() {
           return [[Key], [assert.type.boolean], [assert.type.boolean], [assert.type.boolean], [List], [int], [assert.type.string], [assert.type.string]];
@@ -246,18 +228,17 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           return [[assert.type.string], [DirectiveBinding]];
         }});
       PreBuiltObjects = $__export("PreBuiltObjects", (function() {
-        var PreBuiltObjects = function PreBuiltObjects(view, element, viewContainer, lightDom, bindingPropagationConfig) {
-          assert.argumentTypes(view, assert.type.any, element, NgElement, viewContainer, ViewContainer, lightDom, LightDom, bindingPropagationConfig, BindingPropagationConfig);
+        var PreBuiltObjects = function PreBuiltObjects(view, element, viewContainer, bindingPropagationConfig) {
+          assert.argumentTypes(view, assert.type.any, element, NgElement, viewContainer, ViewContainer, bindingPropagationConfig, BindingPropagationConfig);
           this.view = view;
           this.element = element;
           this.viewContainer = viewContainer;
-          this.lightDom = lightDom;
           this.bindingPropagationConfig = bindingPropagationConfig;
         };
         return ($traceurRuntime.createClass)(PreBuiltObjects, {}, {});
       }()));
       Object.defineProperty(PreBuiltObjects, "parameters", {get: function() {
-          return [[], [NgElement], [ViewContainer], [LightDom], [BindingPropagationConfig]];
+          return [[], [NgElement], [ViewContainer], [BindingPropagationConfig]];
         }});
       ProtoElementInjector = $__export("ProtoElementInjector", (function() {
         var ProtoElementInjector = function ProtoElementInjector(parent, index, bindings) {
@@ -455,6 +436,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             if (isPresent(p._binding9) && p._binding9.callOnDestroy) {
               this._obj9.onDestroy();
             }
+            if (isPresent(this._privateComponentBinding) && this._privateComponentBinding.callOnDestroy) {
+              this._privateComponent.onDestroy();
+            }
             this._obj0 = null;
             this._obj1 = null;
             this._obj2 = null;
@@ -465,6 +449,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             this._obj7 = null;
             this._obj8 = null;
             this._obj9 = null;
+            this._privateComponent = null;
             this._constructionCounter = 0;
           },
           instantiateDirectives: function(lightDomAppInjector, shadowDomAppInjector, preBuiltObjects) {
@@ -494,6 +479,15 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               this._getDirectiveByKeyId(p._keyId8);
             if (isPresent(p._keyId9))
               this._getDirectiveByKeyId(p._keyId9);
+            if (isPresent(this._privateComponentBinding)) {
+              this._privateComponent = this._new(this._privateComponentBinding);
+            }
+          },
+          createPrivateComponent: function(componentType, annotation) {
+            assert.argumentTypes(componentType, Type, annotation, Directive);
+            this._privateComponentBinding = DirectiveBinding.createFromType(componentType, annotation);
+            this._privateComponent = this._new(this._privateComponentBinding);
+            return this._privateComponent;
           },
           _checkShadowDomAppInjector: function(shadowDomAppInjector) {
             assert.argumentTypes(shadowDomAppInjector, Injector);
@@ -528,12 +522,22 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               throw new BaseException('There is not component stored in this ElementInjector');
             }
           },
+          getPrivateComponent: function() {
+            return this._privateComponent;
+          },
+          getShadowDomAppInjector: function() {
+            return this._shadowDomAppInjector;
+          },
           directParent: function() {
             return assert.returnType((this._proto.distanceToParent < 2 ? this.parent : null), ElementInjector);
           },
           _isComponentKey: function(key) {
             assert.argumentTypes(key, Key);
             return this._proto._binding0IsComponent && key.id === this._proto._keyId0;
+          },
+          _isPrivateComponentKey: function(key) {
+            assert.argumentTypes(key, Key);
+            return isPresent(this._privateComponentBinding) && key.id === this._privateComponentBinding.key.id;
           },
           _new: function(binding) {
             assert.argumentTypes(binding, Binding);
@@ -651,6 +655,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             }
             if (isPresent(this._host) && this._host._isComponentKey(key)) {
               return this._host.getComponent();
+            } else if (isPresent(this._host) && this._host._isPrivateComponentKey(key)) {
+              return this._host.getPrivateComponent();
             } else if (optional) {
               return this._appInjector(requestor).getOptional(key);
             } else {
@@ -680,12 +686,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               return this._preBuiltObjects.viewContainer;
             if (keyId === staticKeys.bindingPropagationConfigId)
               return this._preBuiltObjects.bindingPropagationConfig;
-            if (keyId === staticKeys.destinationLightDomId) {
-              var p = assert.type(this.directParent(), ElementInjector);
-              return isPresent(p) ? p._preBuiltObjects.lightDom : null;
-            }
-            if (keyId === staticKeys.lightDomId) {
-              return this._preBuiltObjects.lightDom;
+            if (keyId === staticKeys.privateComponentLocationId) {
+              return new pclModule.PrivateComponentLocation(this, this._preBuiltObjects.element, this._preBuiltObjects.view);
             }
             return _undefined;
           },
@@ -827,6 +829,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       Object.defineProperty(ElementInjector.prototype.instantiateDirectives, "parameters", {get: function() {
           return [[Injector], [Injector], [PreBuiltObjects]];
         }});
+      Object.defineProperty(ElementInjector.prototype.createPrivateComponent, "parameters", {get: function() {
+          return [[Type], [Directive]];
+        }});
       Object.defineProperty(ElementInjector.prototype._checkShadowDomAppInjector, "parameters", {get: function() {
           return [[Injector]];
         }});
@@ -837,6 +842,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           return [[Type]];
         }});
       Object.defineProperty(ElementInjector.prototype._isComponentKey, "parameters", {get: function() {
+          return [[Key]];
+        }});
+      Object.defineProperty(ElementInjector.prototype._isPrivateComponentKey, "parameters", {get: function() {
           return [[Key]];
         }});
       Object.defineProperty(ElementInjector.prototype._new, "parameters", {get: function() {

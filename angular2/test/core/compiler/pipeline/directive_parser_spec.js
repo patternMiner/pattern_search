@@ -4,6 +4,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       describe,
       beforeEach,
       it,
+      xit,
       expect,
       iit,
       ddescribe,
@@ -19,6 +20,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       CompileElement,
       CompileControl,
       Component,
+      DynamicComponent,
       Decorator,
       Viewport,
       Template,
@@ -33,6 +35,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       SomeViewport2,
       SomeComponent,
       SomeComponent2,
+      SomeDynamicComponent,
+      SomeDynamicComponent2,
       MyComp;
   function main() {
     describe('DirectiveParser', (function() {
@@ -40,7 +44,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           directives;
       beforeEach((function() {
         reader = new DirectiveMetadataReader();
-        directives = [SomeDecorator, SomeDecoratorIgnoringChildren, SomeDecoratorWithBinding, SomeViewport, SomeViewport2, SomeComponent, SomeComponent2];
+        directives = [SomeDecorator, SomeDecoratorIgnoringChildren, SomeDecoratorWithBinding, SomeViewport, SomeViewport2, SomeComponent, SomeComponent2, SomeDynamicComponent, SomeDynamicComponent2];
       }));
       function createPipeline() {
         var $__1 = arguments[0] !== (void 0) ? arguments[0] : {},
@@ -103,6 +107,22 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           expect((function() {
             createPipeline().process(el('<template some-comp></template>'));
           })).toThrowError('Only template directives are allowed on template elements - check <template some-comp>');
+        }));
+      }));
+      describe("dynamic component directives", (function() {
+        it('should detect dynamic component', (function() {
+          var results = createPipeline().process(el('<div some-dynamic-comp></div>'));
+          expect(results[0].componentDirective).toEqual(reader.read(SomeDynamicComponent));
+        }));
+        it('should not allow multiple dynamic component directives on the same element', (function() {
+          expect((function() {
+            createPipeline().process(el('<div some-dynamic-comp some-dynamic-comp2></div>'));
+          })).toThrowError(new RegExp('Multiple component directives not allowed on the same element'));
+        }));
+        it('should not allow component and dynamic directives on the same element', (function() {
+          expect((function() {
+            createPipeline().process(el('<div some-dynamic-comp some-comp></div>'));
+          })).toThrowError(new RegExp('Multiple component directives not allowed on the same element'));
         }));
       }));
       describe('viewport directives', (function() {
@@ -171,6 +191,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       describe = $__m.describe;
       beforeEach = $__m.beforeEach;
       it = $__m.it;
+      xit = $__m.xit;
       expect = $__m.expect;
       iit = $__m.iit;
       ddescribe = $__m.ddescribe;
@@ -194,6 +215,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       CompileControl = $__m.CompileControl;
     }, function($__m) {
       Component = $__m.Component;
+      DynamicComponent = $__m.DynamicComponent;
       Decorator = $__m.Decorator;
       Viewport = $__m.Viewport;
     }, function($__m) {
@@ -273,12 +295,26 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       Object.defineProperty(SomeComponent2, "annotations", {get: function() {
           return [new Component({selector: '[some-comp2]'})];
         }});
+      SomeDynamicComponent = (function() {
+        var SomeDynamicComponent = function SomeDynamicComponent() {};
+        return ($traceurRuntime.createClass)(SomeDynamicComponent, {}, {});
+      }());
+      Object.defineProperty(SomeDynamicComponent, "annotations", {get: function() {
+          return [new DynamicComponent({selector: '[some-dynamic-comp]'})];
+        }});
+      SomeDynamicComponent2 = (function() {
+        var SomeDynamicComponent2 = function SomeDynamicComponent2() {};
+        return ($traceurRuntime.createClass)(SomeDynamicComponent2, {}, {});
+      }());
+      Object.defineProperty(SomeDynamicComponent2, "annotations", {get: function() {
+          return [new DynamicComponent({selector: '[some-dynamic-comp2]'})];
+        }});
       MyComp = (function() {
         var MyComp = function MyComp() {};
         return ($traceurRuntime.createClass)(MyComp, {}, {});
       }());
       Object.defineProperty(MyComp, "annotations", {get: function() {
-          return [new Component(), new Template({directives: [SomeDecorator, SomeViewport, SomeViewport2, SomeComponent, SomeComponent2]})];
+          return [new Component(), new Template({directives: [SomeDecorator, SomeViewport, SomeViewport2, SomeComponent, SomeComponent2, SomeDynamicComponent, SomeDynamicComponent2]})];
         }});
     }
   };

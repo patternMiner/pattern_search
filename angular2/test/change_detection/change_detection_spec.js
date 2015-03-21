@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/change_detection/parser/parser", "angular2/src/change_detection/parser/lexer", "angular2/change_detection", "angular2/src/change_detection/change_detection_util", "angular2/src/change_detection/proto_change_detector"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/change_detection/parser/parser", "angular2/src/change_detection/parser/lexer", "angular2/src/change_detection/parser/locals", "angular2/change_detection", "angular2/src/change_detection/change_detection_util", "angular2/src/change_detection/proto_change_detector"], function($__export) {
   "use strict";
   var assert,
       ddescribe,
@@ -21,10 +21,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
       StringMapWrapper,
       Parser,
       Lexer,
+      Locals,
       ChangeDispatcher,
       DynamicChangeDetector,
       ChangeDetectionError,
-      ContextWithVariableBindings,
       BindingRecord,
       PipeRegistry,
       Pipe,
@@ -69,31 +69,45 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
         Object.defineProperty(ast, "parameters", {get: function() {
             return [[assert.type.string], [assert.type.string]];
           }});
+        function convertLocalsToVariableBindings(locals) {
+          var variableBindings = [];
+          var loc = locals;
+          while (isPresent(loc)) {
+            MapWrapper.forEach(loc.current, (function(v, k) {
+              return ListWrapper.push(variableBindings, k);
+            }));
+            loc = loc.parent;
+          }
+          return variableBindings;
+        }
         function createChangeDetector(memo, exp) {
           var context = arguments[2] !== (void 0) ? arguments[2] : null;
-          var registry = arguments[3] !== (void 0) ? arguments[3] : null;
-          assert.argumentTypes(memo, assert.type.string, exp, assert.type.string, context, assert.type.any, registry, assert.type.any);
+          var locals = arguments[3] !== (void 0) ? arguments[3] : null;
+          var registry = arguments[4] !== (void 0) ? arguments[4] : null;
+          assert.argumentTypes(memo, assert.type.string, exp, assert.type.string, context, assert.type.any, locals, assert.type.any, registry, assert.type.any);
           var pcd = createProtoChangeDetector(registry);
           var dispatcher = new TestDispatcher();
-          var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast(exp), memo, memo)]);
-          cd.hydrate(context);
+          var variableBindings = convertLocalsToVariableBindings(locals);
+          var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast(exp), memo, memo)], variableBindings);
+          cd.hydrate(context, locals);
           return {
             "changeDetector": cd,
             "dispatcher": dispatcher
           };
         }
         Object.defineProperty(createChangeDetector, "parameters", {get: function() {
-            return [[assert.type.string], [assert.type.string], [], []];
+            return [[assert.type.string], [assert.type.string], [], [], []];
           }});
         function executeWatch(memo, exp) {
           var context = arguments[2] !== (void 0) ? arguments[2] : null;
-          assert.argumentTypes(memo, assert.type.string, exp, assert.type.string, context, assert.type.any);
-          var res = createChangeDetector(memo, exp, context);
+          var locals = arguments[3] !== (void 0) ? arguments[3] : null;
+          assert.argumentTypes(memo, assert.type.string, exp, assert.type.string, context, assert.type.any, locals, assert.type.any);
+          var res = createChangeDetector(memo, exp, context, locals);
           res["changeDetector"].detectChanges();
           return res["dispatcher"].log;
         }
         Object.defineProperty(executeWatch, "parameters", {get: function() {
-            return [[assert.type.string], [assert.type.string], []];
+            return [[assert.type.string], [assert.type.string], [], []];
           }});
         describe((name + " change detection"), (function() {
           it('should do simple watching', (function() {
@@ -205,8 +219,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
             var pcd = createProtoChangeDetector();
             var ast = parser.parseInterpolation("B{{a}}A", "location");
             var dispatcher = new TestDispatcher();
-            var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast, "memo", "memo")]);
-            cd.hydrate(new TestData("value"));
+            var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast, "memo", "memo")], null);
+            cd.hydrate(new TestData("value"), null);
             cd.detectChanges();
             expect(dispatcher.log).toEqual(["memo=BvalueA"]);
           }));
@@ -230,7 +244,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
                   return new CountingPipe();
                 }));
                 var person = new Person('bob');
-                var c = createChangeDetector('name', 'name | pipe', person, registry);
+                var c = createChangeDetector('name', 'name | pipe', person, null, registry);
                 var cd = c["changeDetector"];
                 var dispatcher = c["dispatcher"];
                 cd.detectChanges();
@@ -244,14 +258,14 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
               it("should notify the dispatcher when a group of records changes", (function() {
                 var pcd = createProtoChangeDetector();
                 var dispatcher = new TestDispatcher();
-                var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast("1 + 2"), "memo", "1"), new BindingRecord(ast("10 + 20"), "memo", "1"), new BindingRecord(ast("100 + 200"), "memo", "2")]);
+                var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast("1 + 2"), "memo", "1"), new BindingRecord(ast("10 + 20"), "memo", "1"), new BindingRecord(ast("100 + 200"), "memo", "2")], null);
                 cd.detectChanges();
                 expect(dispatcher.loggedValues).toEqual([[3, 30], [300]]);
               }));
               it("should notify the dispatcher before switching to the next group", (function() {
                 var pcd = createProtoChangeDetector();
                 var dispatcher = new TestDispatcher();
-                var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast("a()"), "a", "1"), new BindingRecord(ast("b()"), "b", "2"), new BindingRecord(ast("c()"), "c", "2")]);
+                var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast("a()"), "a", "1"), new BindingRecord(ast("b()"), "b", "2"), new BindingRecord(ast("c()"), "c", "2")], null);
                 var tr = new TestRecord();
                 tr.a = (function() {
                   dispatcher.logValue('InvokeA');
@@ -265,7 +279,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
                   dispatcher.logValue('InvokeC');
                   return 'c';
                 });
-                cd.hydrate(tr);
+                cd.hydrate(tr, null);
                 cd.detectChanges();
                 expect(dispatcher.loggedValues).toEqual(['InvokeA', ['a'], 'InvokeB', 'InvokeC', ['b', 'c']]);
               }));
@@ -276,8 +290,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
               var pcd = createProtoChangeDetector();
               pcd.addAst(ast("a"), "a", 1);
               var dispatcher = new TestDispatcher();
-              var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast("a"), "a", 1)]);
-              cd.hydrate(new TestData('value'));
+              var cd = pcd.instantiate(dispatcher, [new BindingRecord(ast("a"), "a", 1)], null);
+              cd.hydrate(new TestData('value'), null);
               expect((function() {
                 cd.checkNoChanges();
               })).toThrowError(new RegExp("Expression 'a in location' has changed after it was checked"));
@@ -286,8 +300,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           describe("error handling", (function() {
             xit("should wrap exceptions into ChangeDetectionError", (function() {
               var pcd = createProtoChangeDetector();
-              var cd = pcd.instantiate(new TestDispatcher(), [new BindingRecord(ast("invalidProp", "someComponent"), "a", 1)]);
-              cd.hydrate(null);
+              var cd = pcd.instantiate(new TestDispatcher(), [new BindingRecord(ast("invalidProp", "someComponent"), "a", 1)], null);
+              cd.hydrate(null, null);
               try {
                 cd.detectChanges();
                 throw new BaseException("fail");
@@ -297,25 +311,25 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
               }
             }));
           }));
-          describe("ContextWithVariableBindings", (function() {
-            it('should read a field from ContextWithVariableBindings', (function() {
-              var locals = new ContextWithVariableBindings(null, MapWrapper.createFromPairs([["key", "value"]]));
-              expect(executeWatch('key', 'key', locals)).toEqual(['key=value']);
+          describe("Locals", (function() {
+            it('should read a value from locals', (function() {
+              var locals = new Locals(null, MapWrapper.createFromPairs([["key", "value"]]));
+              expect(executeWatch('key', 'key', null, locals)).toEqual(['key=value']);
             }));
-            it('should invoke a function from ContextWithVariableBindings', (function() {
-              var locals = new ContextWithVariableBindings(null, MapWrapper.createFromPairs([["key", (function() {
+            it('should invoke a function from local', (function() {
+              var locals = new Locals(null, MapWrapper.createFromPairs([["key", (function() {
                 return "value";
               })]]));
-              expect(executeWatch('key', 'key()', locals)).toEqual(['key=value']);
+              expect(executeWatch('key', 'key()', null, locals)).toEqual(['key=value']);
             }));
-            it('should handle nested ContextWithVariableBindings', (function() {
-              var nested = new ContextWithVariableBindings(null, MapWrapper.createFromPairs([["key", "value"]]));
-              var locals = new ContextWithVariableBindings(nested, MapWrapper.create());
-              expect(executeWatch('key', 'key', locals)).toEqual(['key=value']);
+            it('should handle nested locals', (function() {
+              var nested = new Locals(null, MapWrapper.createFromPairs([["key", "value"]]));
+              var locals = new Locals(nested, MapWrapper.create());
+              expect(executeWatch('key', 'key', null, locals)).toEqual(['key=value']);
             }));
-            it("should fall back to a regular field read when ContextWithVariableBindings " + "does not have the requested field", (function() {
-              var locals = new ContextWithVariableBindings(new Person("Jim"), MapWrapper.createFromPairs([["key", "value"]]));
-              expect(executeWatch('name', 'name', locals)).toEqual(['name=Jim']);
+            it("should fall back to a regular field read when the locals map" + "does not have the requested field", (function() {
+              var locals = new Locals(null, MapWrapper.createFromPairs([["key", "value"]]));
+              expect(executeWatch('name', 'name', new Person("Jim"), locals)).toEqual(['name=Jim']);
             }));
           }));
           describe("handle children", (function() {
@@ -323,9 +337,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
                 child;
             beforeEach((function() {
               var protoParent = createProtoChangeDetector();
-              parent = protoParent.instantiate(null, []);
+              parent = protoParent.instantiate(null, [], null);
               var protoChild = createProtoChangeDetector();
-              child = protoChild.instantiate(null, []);
+              child = protoChild.instantiate(null, [], null);
             }));
             it("should add children", (function() {
               parent.addChild(child);
@@ -357,13 +371,13 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
             expect(dispatcher.log).toEqual([]);
           }));
           it("should change CHECK_ONCE to CHECKED", (function() {
-            var cd = createProtoChangeDetector().instantiate(null, []);
+            var cd = createProtoChangeDetector().instantiate(null, [], null);
             cd.mode = CHECK_ONCE;
             cd.detectChanges();
             expect(cd.mode).toEqual(CHECKED);
           }));
           it("should not change the CHECK_ALWAYS", (function() {
-            var cd = createProtoChangeDetector().instantiate(null, []);
+            var cd = createProtoChangeDetector().instantiate(null, [], null);
             cd.mode = CHECK_ALWAYS;
             cd.detectChanges();
             expect(cd.mode).toEqual(CHECK_ALWAYS);
@@ -371,7 +385,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
         }));
         describe("markPathToRootAsCheckOnce", (function() {
           function changeDetector(mode, parent) {
-            var cd = createProtoChangeDetector().instantiate(null, []);
+            var cd = createProtoChangeDetector().instantiate(null, [], null);
             cd.mode = mode;
             if (isPresent(parent))
               parent.addChild(cd);
@@ -397,11 +411,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
           it("should be able to rehydrate a change detector", (function() {
             var c = createChangeDetector("memo", "name");
             var cd = c["changeDetector"];
-            cd.hydrate("some context");
+            cd.hydrate("some context", null);
             expect(cd.hydrated()).toBe(true);
             cd.dehydrate();
             expect(cd.hydrated()).toBe(false);
-            cd.hydrate("other context");
+            cd.hydrate("other context", null);
             expect(cd.hydrated()).toBe(true);
           }));
           it("should destroy all active pipes during dehyration", (function() {
@@ -409,7 +423,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
             var registry = new FakePipeRegistry('pipe', (function() {
               return pipe;
             }));
-            var c = createChangeDetector("memo", "name | pipe", new Person('bob'), registry);
+            var c = createChangeDetector("memo", "name | pipe", new Person('bob'), null, registry);
             var cd = c["changeDetector"];
             cd.detectChanges();
             cd.dehydrate();
@@ -422,7 +436,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
               return new CountingPipe();
             }));
             var ctx = new Person("Megatron");
-            var c = createChangeDetector("memo", "name | pipe", ctx, registry);
+            var c = createChangeDetector("memo", "name | pipe", ctx, null, registry);
             var cd = c["changeDetector"];
             var dispatcher = c["dispatcher"];
             cd.detectChanges();
@@ -436,7 +450,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
               return new OncePipe();
             }));
             var ctx = new Person("Megatron");
-            var c = createChangeDetector("memo", "name | pipe", ctx, registry);
+            var c = createChangeDetector("memo", "name | pipe", ctx, null, registry);
             var cd = c["changeDetector"];
             cd.detectChanges();
             expect(registry.numberOfLookups).toEqual(1);
@@ -450,7 +464,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
               return pipe;
             }));
             var ctx = new Person("Megatron");
-            var c = createChangeDetector("memo", "name | pipe", ctx, registry);
+            var c = createChangeDetector("memo", "name | pipe", ctx, null, registry);
             var cd = c["changeDetector"];
             cd.detectChanges();
             ctx.name = "Optimus Prime";
@@ -463,7 +477,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
             return new IdentityPipe();
           }));
           var ctx = new Person("Megatron");
-          var c = createChangeDetector("memo", "name | pipe", ctx, registry);
+          var c = createChangeDetector("memo", "name | pipe", ctx, null, registry);
           var cd = c["changeDetector"];
           var dispatcher = c["dispatcher"];
           cd.detectChanges();
@@ -507,10 +521,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/test_lib", "angular2/src/f
     }, function($__m) {
       Lexer = $__m.Lexer;
     }, function($__m) {
+      Locals = $__m.Locals;
+    }, function($__m) {
       ChangeDispatcher = $__m.ChangeDispatcher;
       DynamicChangeDetector = $__m.DynamicChangeDetector;
       ChangeDetectionError = $__m.ChangeDetectionError;
-      ContextWithVariableBindings = $__m.ContextWithVariableBindings;
       BindingRecord = $__m.BindingRecord;
       PipeRegistry = $__m.PipeRegistry;
       Pipe = $__m.Pipe;

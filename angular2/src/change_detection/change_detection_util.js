@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./proto_record", "./exceptions", "./pipes/pipe", "./interfaces"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./proto_record", "./exceptions", "./pipes/pipe", "./interfaces"], function($__export) {
   "use strict";
   var assert,
       isPresent,
@@ -9,7 +9,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ListWrapper,
       MapWrapper,
       StringMapWrapper,
-      ContextWithVariableBindings,
       ProtoRecord,
       ExpressionChangedAfterItHasBeenChecked,
       NO_CHANGE,
@@ -54,8 +53,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ListWrapper = $__m.ListWrapper;
       MapWrapper = $__m.MapWrapper;
       StringMapWrapper = $__m.StringMapWrapper;
-    }, function($__m) {
-      ContextWithVariableBindings = $__m.ContextWithVariableBindings;
     }, function($__m) {
       ProtoRecord = $__m.ProtoRecord;
     }, function($__m) {
@@ -225,16 +222,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           keyedAccess: function(obj, args) {
             return obj[args[0]];
           },
-          findContext: function(name, c) {
-            assert.argumentTypes(name, assert.type.string, c, assert.type.any);
-            while (c instanceof ContextWithVariableBindings) {
-              if (c.hasBinding(name)) {
-                return c;
-              }
-              c = c.parent;
-            }
-            return c;
-          },
           noChangeMarker: function(value) {
             return assert.returnType((value === NO_CHANGE), assert.type.boolean);
           },
@@ -270,9 +257,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       }()));
       Object.defineProperty(ChangeDetectionUtil.mapFn, "parameters", {get: function() {
           return [[List]];
-        }});
-      Object.defineProperty(ChangeDetectionUtil.findContext, "parameters", {get: function() {
-          return [[assert.type.string], []];
         }});
       Object.defineProperty(ChangeDetectionUtil.throwOnChange, "parameters", {get: function() {
           return [[ProtoRecord], []];

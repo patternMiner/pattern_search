@@ -12,7 +12,7 @@ System.register(["rtts_assert/rtts_assert", "./view", "angular2/src/dom/dom_adap
       isPresent,
       isBlank,
       EventManager,
-      ldModule,
+      LightDom,
       ViewContainer;
   return {
     setters: [function($__m) {
@@ -36,7 +36,7 @@ System.register(["rtts_assert/rtts_assert", "./view", "angular2/src/dom/dom_adap
     }, function($__m) {
       EventManager = $__m.EventManager;
     }, function($__m) {
-      ldModule = $__m;
+      LightDom = $__m.LightDom;
     }],
     execute: function() {
       ViewContainer = $__export("ViewContainer", (function() {
@@ -55,11 +55,11 @@ System.register(["rtts_assert/rtts_assert", "./view", "angular2/src/dom/dom_adap
           this._eventManager = eventManager;
         };
         return ($traceurRuntime.createClass)(ViewContainer, {
-          hydrate: function(appInjector, hostElementInjector) {
-            assert.argumentTypes(appInjector, Injector, hostElementInjector, eiModule.ElementInjector);
+          hydrate: function(appInjector, hostElementInjector, hostLightDom) {
+            assert.argumentTypes(appInjector, Injector, hostElementInjector, eiModule.ElementInjector, hostLightDom, LightDom);
             this.appInjector = appInjector;
             this.hostElementInjector = hostElementInjector;
-            this.hostLightDom = isPresent(hostElementInjector) ? hostElementInjector.get(ldModule.LightDom) : null;
+            this.hostLightDom = hostLightDom;
           },
           dehydrate: function() {
             this.appInjector = null;
@@ -94,7 +94,7 @@ System.register(["rtts_assert/rtts_assert", "./view", "angular2/src/dom/dom_adap
               throw new BaseException('Cannot create views on a dehydrated ViewContainer');
             var newView = this.defaultProtoView.instantiate(this.hostElementInjector, this._eventManager);
             this.insert(newView, atIndex);
-            newView.hydrate(this.appInjector, this.hostElementInjector, this.parentView.context);
+            newView.hydrate(this.appInjector, this.hostElementInjector, this.hostLightDom, this.parentView.context, this.parentView.locals);
             if (isPresent(this.hostLightDom)) {
               this.hostLightDom.redistribute();
             }
@@ -177,7 +177,7 @@ System.register(["rtts_assert/rtts_assert", "./view", "angular2/src/dom/dom_adap
           return [[viewModule.View], [], [viewModule.ProtoView], [eiModule.ElementInjector], [EventManager], []];
         }});
       Object.defineProperty(ViewContainer.prototype.hydrate, "parameters", {get: function() {
-          return [[Injector], [eiModule.ElementInjector]];
+          return [[Injector], [eiModule.ElementInjector], [LightDom]];
         }});
       Object.defineProperty(ViewContainer.prototype.get, "parameters", {get: function() {
           return [[assert.type.number]];

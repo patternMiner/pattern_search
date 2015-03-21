@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/async", "./xhr"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/async", "./xhr"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       Promise,
       PromiseWrapper,
       XHR,
@@ -8,6 +9,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/async", "./xhr"
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       Promise = $__m.Promise;
       PromiseWrapper = $__m.PromiseWrapper;
@@ -40,6 +43,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/async", "./xhr"
             return assert.returnType((completer.promise), assert.genericType(Promise, assert.type.string));
           }}, {}, $__super);
       }(XHR)));
+      Object.defineProperty(XHRImpl, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(XHRImpl.prototype.get, "parameters", {get: function() {
           return [[assert.type.string]];
         }});

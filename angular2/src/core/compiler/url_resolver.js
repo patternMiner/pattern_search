@@ -1,6 +1,7 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/dom/dom_adapter"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/di", "angular2/src/facade/lang", "angular2/src/dom/dom_adapter"], function($__export) {
   "use strict";
   var assert,
+      Injectable,
       isPresent,
       isBlank,
       RegExpWrapper,
@@ -11,6 +12,8 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
   return {
     setters: [function($__m) {
       assert = $__m.assert;
+    }, function($__m) {
+      Injectable = $__m.Injectable;
     }, function($__m) {
       isPresent = $__m.isPresent;
       isBlank = $__m.isBlank;
@@ -45,6 +48,9 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
             return assert.returnType((DOM.getHref(UrlResolver.a)), assert.type.string);
           }}, {});
       }()));
+      Object.defineProperty(UrlResolver, "annotations", {get: function() {
+          return [new Injectable()];
+        }});
       Object.defineProperty(UrlResolver.prototype.resolve, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string]];
         }});

@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/core", "angular2/forms"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/angular2", "angular2/forms"], function($__export) {
   "use strict";
   var assert,
       Decorator,

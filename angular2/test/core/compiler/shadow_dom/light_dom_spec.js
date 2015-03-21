@@ -1,4 +1,4 @@
-System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/dom/dom_adapter", "angular2/src/core/compiler/shadow_dom_emulation/content_tag", "angular2/src/core/compiler/shadow_dom_emulation/light_dom", "angular2/src/core/compiler/view", "angular2/src/core/compiler/view_container", "angular2/src/core/compiler/element_injector"], function($__export) {
+System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/facade/collection", "angular2/src/dom/dom_adapter", "angular2/src/core/compiler/shadow_dom_emulation/content_tag", "angular2/src/core/compiler/shadow_dom_emulation/light_dom", "angular2/src/core/compiler/view", "angular2/src/core/compiler/view_container"], function($__export) {
   "use strict";
   var describe,
       beforeEach,
@@ -11,6 +11,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       proxy,
       IMPLEMENTS,
       isBlank,
+      isPresent,
       ListWrapper,
       MapWrapper,
       DOM,
@@ -18,8 +19,6 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       LightDom,
       View,
       ViewContainer,
-      ElementInjector,
-      FakeElementInjector,
       FakeView,
       FakeViewContainer,
       FakeContentTag;
@@ -27,63 +26,61 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
     describe('LightDom', function() {
       var lightDomView;
       beforeEach((function() {
-        lightDomView = new FakeView([]);
+        lightDomView = new FakeView();
       }));
       describe("contentTags", (function() {
         it("should collect content tags from element injectors", (function() {
-          var tag = new FakeContentTag();
-          var shadowDomView = new FakeView([new FakeElementInjector(tag)]);
+          var tag = new FakeContentTag(el('<script></script>'));
+          var shadowDomView = new FakeView([tag]);
           var lightDom = new LightDom(lightDomView, shadowDomView, el("<div></div>"));
           expect(lightDom.contentTags()).toEqual([tag]);
         }));
         it("should collect content tags from ViewContainers", (function() {
-          var tag = new FakeContentTag();
-          var vp = new FakeViewContainer(null, [new FakeView([new FakeElementInjector(tag, null)])]);
-          var shadowDomView = new FakeView([new FakeElementInjector(null, vp)]);
+          var tag = new FakeContentTag(el('<script></script>'));
+          var vc = new FakeViewContainer(null, null, [new FakeView([tag])]);
+          var shadowDomView = new FakeView([vc]);
           var lightDom = new LightDom(lightDomView, shadowDomView, el("<div></div>"));
           expect(lightDom.contentTags()).toEqual([tag]);
         }));
       }));
-      describe("expanded roots", (function() {
+      describe("expandedDomNodes", (function() {
         it("should contain root nodes", (function() {
           var lightDomEl = el("<div><a></a></div>");
           var lightDom = new LightDom(lightDomView, new FakeView(), lightDomEl);
           expect(toHtml(lightDom.expandedDomNodes())).toEqual(["<a></a>"]);
         }));
-        it("should include ViewContainer nodes", (function() {
+        it("should include view container nodes", (function() {
           var lightDomEl = el("<div><template></template></div>");
-          var lightDomView = new FakeView([new FakeElementInjector(null, new FakeViewContainer([el("<a></a>")]), DOM.firstChild(lightDomEl))]);
-          var lightDom = new LightDom(lightDomView, new FakeView(), lightDomEl);
+          var lightDom = new LightDom(new FakeView([new FakeViewContainer(DOM.firstChild(lightDomEl), [el('<a></a>')])]), null, lightDomEl);
           expect(toHtml(lightDom.expandedDomNodes())).toEqual(["<a></a>"]);
         }));
         it("should include content nodes", (function() {
           var lightDomEl = el("<div><content></content></div>");
-          var lightDomView = new FakeView([new FakeElementInjector(new FakeContentTag(null, [el("<a></a>")]), null, DOM.firstChild(lightDomEl))]);
-          var lightDom = new LightDom(lightDomView, new FakeView(), lightDomEl);
+          var lightDom = new LightDom(new FakeView([new FakeContentTag(DOM.firstChild(lightDomEl), '', [el('<a></a>')])]), null, lightDomEl);
           expect(toHtml(lightDom.expandedDomNodes())).toEqual(["<a></a>"]);
         }));
         it("should work when the element injector array contains nulls", (function() {
           var lightDomEl = el("<div><a></a></div>");
-          var lightDomView = new FakeView([null]);
+          var lightDomView = new FakeView();
           var lightDom = new LightDom(lightDomView, new FakeView(), lightDomEl);
           expect(toHtml(lightDom.expandedDomNodes())).toEqual(["<a></a>"]);
         }));
       }));
       describe("redistribute", (function() {
         it("should redistribute nodes between content tags with select property set", (function() {
-          var contentA = new FakeContentTag("a");
-          var contentB = new FakeContentTag("b");
+          var contentA = new FakeContentTag(null, "a");
+          var contentB = new FakeContentTag(null, "b");
           var lightDomEl = el("<div><a>1</a><b>2</b><a>3</a></div>");
-          var lightDom = new LightDom(lightDomView, new FakeView([new FakeElementInjector(contentA, null), new FakeElementInjector(contentB, null)]), lightDomEl);
+          var lightDom = new LightDom(lightDomView, new FakeView([contentA, contentB]), lightDomEl);
           lightDom.redistribute();
           expect(toHtml(contentA.nodes())).toEqual(["<a>1</a>", "<a>3</a>"]);
           expect(toHtml(contentB.nodes())).toEqual(["<b>2</b>"]);
         }));
         it("should support wildcard content tags", (function() {
-          var wildcard = new FakeContentTag(null);
-          var contentB = new FakeContentTag("b");
+          var wildcard = new FakeContentTag(null, '');
+          var contentB = new FakeContentTag(null, "b");
           var lightDomEl = el("<div><a>1</a><b>2</b><a>3</a></div>");
-          var lightDom = new LightDom(lightDomView, new FakeView([new FakeElementInjector(wildcard, null), new FakeElementInjector(contentB, null)]), lightDomEl);
+          var lightDom = new LightDom(lightDomView, new FakeView([wildcard, contentB]), lightDomEl);
           lightDom.redistribute();
           expect(toHtml(wildcard.nodes())).toEqual(["<a>1</a>", "<b>2</b>", "<a>3</a>"]);
           expect(toHtml(contentB.nodes())).toEqual([]);
@@ -111,6 +108,7 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
     }, function($__m) {
       IMPLEMENTS = $__m.IMPLEMENTS;
       isBlank = $__m.isBlank;
+      isPresent = $__m.isPresent;
     }, function($__m) {
       ListWrapper = $__m.ListWrapper;
       MapWrapper = $__m.MapWrapper;
@@ -124,48 +122,28 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
       View = $__m.View;
     }, function($__m) {
       ViewContainer = $__m.ViewContainer;
-    }, function($__m) {
-      ElementInjector = $__m.ElementInjector;
     }],
     execute: function() {
-      FakeElementInjector = (function() {
-        var FakeElementInjector = function FakeElementInjector() {
-          var content = arguments[0] !== (void 0) ? arguments[0] : null;
-          var viewContainer = arguments[1] !== (void 0) ? arguments[1] : null;
-          var element = arguments[2] !== (void 0) ? arguments[2] : null;
-          this.content = content;
-          this.viewContainer = viewContainer;
-          this.element = element;
-        };
-        return ($traceurRuntime.createClass)(FakeElementInjector, {
-          hasDirective: function(type) {
-            return this.content != null;
-          },
-          hasPreBuiltObject: function(type) {
-            return this.viewContainer != null;
-          },
-          forElement: function(n) {
-            return this.element == n;
-          },
-          get: function(t) {
-            if (t === Content)
-              return this.content;
-            if (t === ViewContainer)
-              return this.viewContainer;
-            return null;
-          },
-          noSuchMethod: function(i) {
-            $traceurRuntime.superGet(this, FakeElementInjector.prototype, "noSuchMethod").call(this, i);
-          }
-        }, {});
-      }());
-      Object.defineProperty(FakeElementInjector, "annotations", {get: function() {
-          return [new proxy, new IMPLEMENTS(ElementInjector)];
-        }});
       FakeView = (function() {
         var FakeView = function FakeView() {
-          var elementInjectors = arguments[0] !== (void 0) ? arguments[0] : null;
-          this.elementInjectors = elementInjectors;
+          var containers = arguments[0] !== (void 0) ? arguments[0] : null;
+          var $__0 = this;
+          this.contentTags = [];
+          this.viewContainers = [];
+          if (isPresent(containers)) {
+            ListWrapper.forEach(containers, (function(c) {
+              if (c instanceof FakeContentTag) {
+                ListWrapper.push($__0.contentTags, c);
+              } else {
+                ListWrapper.push($__0.contentTags, null);
+              }
+              if (c instanceof FakeViewContainer) {
+                ListWrapper.push($__0.viewContainers, c);
+              } else {
+                ListWrapper.push($__0.viewContainers, null);
+              }
+            }));
+          }
         };
         return ($traceurRuntime.createClass)(FakeView, {noSuchMethod: function(i) {
             $traceurRuntime.superGet(this, FakeView.prototype, "noSuchMethod").call(this, i);
@@ -175,9 +153,10 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
           return [new proxy, new IMPLEMENTS(View)];
         }});
       FakeViewContainer = (function() {
-        var FakeViewContainer = function FakeViewContainer() {
-          var nodes = arguments[0] !== (void 0) ? arguments[0] : null;
-          var views = arguments[1] !== (void 0) ? arguments[1] : null;
+        var FakeViewContainer = function FakeViewContainer(templateEl) {
+          var nodes = arguments[1] !== (void 0) ? arguments[1] : null;
+          var views = arguments[2] !== (void 0) ? arguments[2] : null;
+          this.templateElement = templateEl;
           this._nodes = nodes;
           this._contentTagContainers = views;
         };
@@ -197,9 +176,10 @@ System.register(["angular2/test_lib", "angular2/src/facade/lang", "angular2/src/
           return [new proxy, new IMPLEMENTS(ViewContainer)];
         }});
       FakeContentTag = (function() {
-        var FakeContentTag = function FakeContentTag() {
-          var select = arguments[0] !== (void 0) ? arguments[0] : null;
-          var nodes = arguments[1] !== (void 0) ? arguments[1] : null;
+        var FakeContentTag = function FakeContentTag(contentEl) {
+          var select = arguments[1] !== (void 0) ? arguments[1] : '';
+          var nodes = arguments[2] !== (void 0) ? arguments[2] : null;
+          this.contentStartElement = contentEl;
           this.select = select;
           this._nodes = nodes;
         };

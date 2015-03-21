@@ -1,4 +1,4 @@
-System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./parser/context_with_variable_bindings", "./abstract_change_detector", "./change_detection_util", "./proto_record"], function($__export) {
+System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular2/src/facade/collection", "./abstract_change_detector", "./change_detection_util", "./proto_record"], function($__export) {
   "use strict";
   var assert,
       isPresent,
@@ -9,12 +9,12 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ListWrapper,
       MapWrapper,
       StringMapWrapper,
-      ContextWithVariableBindings,
       AbstractChangeDetector,
       ChangeDetectionUtil,
       ProtoRecord,
       RECORD_TYPE_SELF,
       RECORD_TYPE_PROPERTY,
+      RECORD_TYPE_LOCAL,
       RECORD_TYPE_INVOKE_METHOD,
       RECORD_TYPE_CONST,
       RECORD_TYPE_INVOKE_CLOSURE,
@@ -27,8 +27,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       DISPATCHER_ACCESSOR,
       PIPE_REGISTRY_ACCESSOR,
       PROTOS_ACCESSOR,
+      CONTEXT_ACCESSOR,
       CHANGE_LOCAL,
       CHANGES_LOCAL,
+      LOCALS_ACCESSOR,
       TEMP_LOCAL,
       ChangeDetectorJITGenerator;
   function typeTemplate(type, cons, detectChanges, setContext) {
@@ -46,7 +48,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
   }
   function hydrateTemplate(type, fieldsDefinitions, pipeOnDestroy) {
     assert.argumentTypes(type, assert.type.string, fieldsDefinitions, assert.type.string, pipeOnDestroy, assert.type.string);
-    return assert.returnType((("\n" + type + ".prototype.hydrate = function(context) {\n  this.context = context;\n}\n" + type + ".prototype.dehydrate = function() {\n  " + pipeOnDestroy + "\n  " + fieldsDefinitions + "\n}\n" + type + ".prototype.hydrated = function() {\n  return this.context !== " + UTIL + ".unitialized();\n}\n")), assert.type.string);
+    return assert.returnType((("\n" + type + ".prototype.hydrate = function(context, locals) {\n  " + CONTEXT_ACCESSOR + " = context;\n  " + LOCALS_ACCESSOR + " = locals;\n}\n" + type + ".prototype.dehydrate = function() {\n  " + pipeOnDestroy + "\n  " + fieldsDefinitions + "\n  " + LOCALS_ACCESSOR + " = null;\n}\n" + type + ".prototype.hydrated = function() {\n  return " + CONTEXT_ACCESSOR + " !== " + UTIL + ".unitialized();\n}\n")), assert.type.string);
   }
   function detectChangesTemplate(type, body) {
     assert.argumentTypes(type, assert.type.string, body, assert.type.string);
@@ -54,7 +56,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
   }
   function bodyTemplate(localDefinitions, changeDefinitions, records) {
     assert.argumentTypes(localDefinitions, assert.type.string, changeDefinitions, assert.type.string, records, assert.type.string);
-    return assert.returnType((("\n" + localDefinitions + "\n" + changeDefinitions + "\nvar " + TEMP_LOCAL + ";\nvar " + CHANGE_LOCAL + ";\nvar " + CHANGES_LOCAL + " = null;\n\ncontext = this.context;\n" + records + "\n")), assert.type.string);
+    return assert.returnType((("\n" + localDefinitions + "\n" + changeDefinitions + "\nvar " + TEMP_LOCAL + ";\nvar " + CHANGE_LOCAL + ";\nvar " + CHANGES_LOCAL + " = null;\n\ncontext = " + CONTEXT_ACCESSOR + ";\n" + records + "\n")), assert.type.string);
   }
   function notifyTemplate(index) {
     assert.argumentTypes(index, assert.type.number);
@@ -70,14 +72,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
   function assignmentTemplate(field, value) {
     assert.argumentTypes(field, assert.type.string, value, assert.type.string);
     return (field + " = " + value + ";");
-  }
-  function propertyReadTemplate(name, context, newValue) {
-    assert.argumentTypes(name, assert.type.string, context, assert.type.string, newValue, assert.type.string);
-    return ("\n" + TEMP_LOCAL + " = " + UTIL + ".findContext(\"" + name + "\", " + context + ");\nif (" + TEMP_LOCAL + " instanceof ContextWithVariableBindings) {\n  " + newValue + " = " + TEMP_LOCAL + ".get('" + name + "');\n} else {\n  " + newValue + " = " + TEMP_LOCAL + "." + name + ";\n}\n");
-  }
-  function invokeMethodTemplate(name, args, context, newValue) {
-    assert.argumentTypes(name, assert.type.string, args, assert.type.string, context, assert.type.string, newValue, assert.type.string);
-    return ("\n" + TEMP_LOCAL + " = " + UTIL + ".findContext(\"" + name + "\", " + context + ");\nif (" + TEMP_LOCAL + " instanceof ContextWithVariableBindings) {\n  " + newValue + " = " + TEMP_LOCAL + ".get('" + name + "').apply(null, [" + args + "]);\n} else {\n  " + newValue + " = " + context + "." + name + "(" + args + ");\n}\n");
   }
   function localDefinitionsTemplate(names) {
     return assert.returnType((names.map((function(n) {
@@ -117,8 +111,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       MapWrapper = $__m.MapWrapper;
       StringMapWrapper = $__m.StringMapWrapper;
     }, function($__m) {
-      ContextWithVariableBindings = $__m.ContextWithVariableBindings;
-    }, function($__m) {
       AbstractChangeDetector = $__m.AbstractChangeDetector;
     }, function($__m) {
       ChangeDetectionUtil = $__m.ChangeDetectionUtil;
@@ -126,6 +118,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       ProtoRecord = $__m.ProtoRecord;
       RECORD_TYPE_SELF = $__m.RECORD_TYPE_SELF;
       RECORD_TYPE_PROPERTY = $__m.RECORD_TYPE_PROPERTY;
+      RECORD_TYPE_LOCAL = $__m.RECORD_TYPE_LOCAL;
       RECORD_TYPE_INVOKE_METHOD = $__m.RECORD_TYPE_INVOKE_METHOD;
       RECORD_TYPE_CONST = $__m.RECORD_TYPE_CONST;
       RECORD_TYPE_INVOKE_CLOSURE = $__m.RECORD_TYPE_INVOKE_CLOSURE;
@@ -140,8 +133,10 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
       DISPATCHER_ACCESSOR = "this.dispatcher";
       PIPE_REGISTRY_ACCESSOR = "this.pipeRegistry";
       PROTOS_ACCESSOR = "this.protos";
+      CONTEXT_ACCESSOR = "this.context";
       CHANGE_LOCAL = "change";
       CHANGES_LOCAL = "changes";
+      LOCALS_ACCESSOR = "this.locals";
       TEMP_LOCAL = "temp";
       Object.defineProperty(typeTemplate, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string]];
@@ -169,12 +164,6 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
         }});
       Object.defineProperty(assignmentTemplate, "parameters", {get: function() {
           return [[assert.type.string], [assert.type.string]];
-        }});
-      Object.defineProperty(propertyReadTemplate, "parameters", {get: function() {
-          return [[assert.type.string], [assert.type.string], [assert.type.string]];
-        }});
-      Object.defineProperty(invokeMethodTemplate, "parameters", {get: function() {
-          return [[assert.type.string], [assert.type.string], [assert.type.string], [assert.type.string]];
         }});
       Object.defineProperty(localDefinitionsTemplate, "parameters", {get: function() {
           return [[List]];
@@ -228,7 +217,7 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
           },
           generate: function() {
             var text = typeTemplate(this.typeName, this.genConstructor(), this.genDetectChanges(), this.genHydrate());
-            return assert.returnType((new Function('AbstractChangeDetector', 'ChangeDetectionUtil', 'ContextWithVariableBindings', 'protos', text)(AbstractChangeDetector, ChangeDetectionUtil, ContextWithVariableBindings, this.records)), Function);
+            return assert.returnType((new Function('AbstractChangeDetector', 'ChangeDetectionUtil', 'protos', text)(AbstractChangeDetector, ChangeDetectionUtil, this.records)), Function);
           },
           genConstructor: function() {
             return assert.returnType((constructorTemplate(this.typeName, this.genFieldDefinitions())), assert.type.string);
@@ -315,17 +304,11 @@ System.register(["rtts_assert/rtts_assert", "angular2/src/facade/lang", "angular
               case RECORD_TYPE_CONST:
                 return assert.returnType(((newValue + " = " + this.genLiteral(r.funcOrValue))), assert.type.string);
               case RECORD_TYPE_PROPERTY:
-                if (r.contextIndex == 0) {
-                  return assert.returnType((propertyReadTemplate(r.name, context, newValue)), assert.type.string);
-                } else {
-                  return assert.returnType((assignmentTemplate(newValue, (context + "." + r.name))), assert.type.string);
-                }
+                return assert.returnType((assignmentTemplate(newValue, (context + "." + r.name))), assert.type.string);
+              case RECORD_TYPE_LOCAL:
+                return assert.returnType((assignmentTemplate(newValue, (LOCALS_ACCESSOR + ".get('" + r.name + "')"))), assert.type.string);
               case RECORD_TYPE_INVOKE_METHOD:
-                if (r.contextIndex == 0) {
-                  return assert.returnType((invokeMethodTemplate(r.name, args, context, newValue)), assert.type.string);
-                } else {
-                  return assert.returnType((assignmentTemplate(newValue, (context + "." + r.name + "(" + args + ")"))), assert.type.string);
-                }
+                return assert.returnType((assignmentTemplate(newValue, (context + "." + r.name + "(" + args + ")"))), assert.type.string);
               case RECORD_TYPE_INVOKE_CLOSURE:
                 return assert.returnType((assignmentTemplate(newValue, (context + "(" + args + ")"))), assert.type.string);
               case RECORD_TYPE_PRIMITIVE_OP:
