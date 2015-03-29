@@ -1,4 +1,4 @@
-import {Component, Template, Foreach} from 'angular2/angular2';
+import {Component, Template, For} from 'angular2/angular2';
 import {List, ListWrapper} from 'angular2/src/facade/collection';
 import {Chip} from 'pattern_search/components/common/list_builder/chip';
 
@@ -13,7 +13,7 @@ import {Chip} from 'pattern_search/components/common/list_builder/chip';
 })
 @Template({
   url: `pattern_search/components/common/list_builder/list_builder.html`,
-  directives: [Chip, Foreach]
+  directives: [Chip, For]
 })
 export class ListBuilder {
   _itemList: List;

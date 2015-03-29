@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Pattern Search: An Angular2 Demo.</title>
+    <script src="dist/es6-shim.js"></script>
     <link rel=stylesheet type="text/css" href="main.css"></style>
   </head>
 
@@ -10,12 +11,14 @@
       Loading...
     </pattern-search>
 
-    <script src="deps/traceur.js"></script>
-    <script src="deps/es6-module-loader-sans-promises.js" type="text/javascript"></script>
-    <script src="deps/zone.js" type="text/javascript"></script>
-    <script src="deps/long-stack-trace-zone.js" type="text/javascript"></script>
-    <script src="deps/system.js" type="text/javascript"></script>
-    <script type="text/javascript">
+    <script>
+      System.paths = {
+        'angular2/*':'/angular2/*.js',
+        'rtts_assert/*': '/rtts_assert/*.js',
+        'rx/*': 'node_modules/rx/*.js',
+        'pattern_search/*': '/pattern_search/*.js',
+        'index': 'index.js'
+      };
       System.import('index');
     </script>
   </body>

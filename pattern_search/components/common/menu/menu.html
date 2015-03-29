@@ -28,7 +28,7 @@
   }
 </style>
 <div class="menu-container">
-  <div class="menu-item-row" *foreach="#item in listProvider.items">
+  <div class="menu-item-row" *for="#item of listProvider.items">
     <div class="menu-item-state-regular"
          *if="!selectionModel.isSelected(item)"></div>
     <div class="menu-item-state-selected"

@@ -1,4 +1,4 @@
-import {Component, Template, Foreach, If} from 'angular2/angular2';
+import {Component, Template, For, If} from 'angular2/angular2';
 import {ListProvider} from 'pattern_search/components/common/menu/list_provider';
 import {SelectionModel} from 'pattern_search/components/common/menu/selection_model';
 
@@ -11,7 +11,7 @@ import {SelectionModel} from 'pattern_search/components/common/menu/selection_mo
 })
 @Template({
   url: `pattern_search/components/common/menu/menu.html`,
-  directives: [Foreach, If]
+  directives: [For, If]
 })
 export class Menu {
   listProvider: ListProvider;

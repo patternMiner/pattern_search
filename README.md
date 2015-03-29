@@ -19,15 +19,14 @@ If you don't have `npm` yet:
 
      curl https://npmjs.org/install.sh | sh
 
-Once you have `npm`:
+Once you have `npm`, build the project:
 
-     npm install http-server -g
-
-This will install `http-server` globally so that it may be run from the command line.
+     npm install
+     gulp
 
 ## Run the webserver:
 
-     http-server -c-1 .
+     node_modules/http_server/bin/http-server -c-1 .
 
 Open the following URL in Chrome:
 http://localhost:8080/index.html

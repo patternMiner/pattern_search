@@ -2,6 +2,10 @@
 .DS_Store
 .idea
 .pub/
+angular2/
 build/
+dist/
+node_modules/
 packages
 pubspec.lock
+rtts_assert/

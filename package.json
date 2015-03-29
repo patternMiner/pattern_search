@@ -1,0 +1,40 @@
+{
+  "name": "pattern_search",
+  "version": "1.0.0-alpha.1",
+  "description": "PatternSearch: An Angular2 Demo.",
+  "main": "gulpfile.js",
+  "private": true,
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "gulp",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patternMiner/pattern_search.git"
+  },
+  "author": "Jagdish Bisa",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/patternMiner/pattern_search/issues"
+  },
+  "homepage": "https://github.com/patternMiner/pattern_search",
+  "devDependencies": {
+    "del": "^1.1.1",
+    "gulp": "^3.8.11",
+    "gulp-concat": "^2.5.2",
+    "gulp-rename": "^1.2.0",
+    "gulp-shell": "^0.3.0",
+    "run-sequence": "^1.0.2",
+    "http-server": "^0.8.0"
+  },
+  "dependencies": {
+    "angular2": "^2.0.0-alpha.18",
+    "rtts_assert": "^2.0.0-alpha.7",
+    "rx": "2.4.6",
+    "systemjs": "^0.14.1",
+    "zone.js": "^0.4.1"
+  }
+}
